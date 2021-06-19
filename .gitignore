@@ -132,3 +132,4 @@ dmypy.json
 
 # Pipenv
 Pipfile.lock
+src/aeda/connection_strings/databases.ini
