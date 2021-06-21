@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+from typing import Union
 
 from config import CONFIG_DB
 
@@ -19,3 +20,12 @@ def get_db_connection_string(db_conf: str) -> dict:
         )
 
     return db
+
+
+def get_connection_parameters(db_conf: str) -> Union[str, str, str, str]:
+    connection_string = get_db_connection_string(db_conf)
+    db_engine = connection_string["db_engine"]
+    server_name = connection_string["host"]
+    catalog_name = connection_string["catalog"]
+    schema_name = connection_string["schema"]
+    return db_engine, server_name, catalog_name, schema_name

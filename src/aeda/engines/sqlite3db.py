@@ -1,6 +1,6 @@
 import logging
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 from config import SQL_CREATE_SCRIPTS, SQLITE3_DB_DIR
 
