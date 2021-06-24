@@ -1,16 +1,14 @@
 import logging
-from os import close
 
 import pymysql
-import utils as _utils
+
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
-from pymysql import cursors
+import utils as _utils
+
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
-
-DBENGINE = "mysql"
 
 
 def create_database(section):
@@ -19,7 +17,7 @@ def create_database(section):
     conn_string = _utils.get_db_connection_string(section)
     conn = get_db_connection(conn_string)
 
-    with open(SQL_CREATE_SCRIPTS[DBENGINE], "r") as f:
+    with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
         sql_script = f.read()
         scripts = sql_script.split(";")
         scripts = [x for x in sql_script.split(";") if len(x.strip()) > 0]
@@ -89,8 +87,8 @@ def check_if_record_exists(
     table_name,
     column_name,
 ):
-    query = SQL_SCRIPTS["check_if_column_exists"][DBENGINE]
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
+    query = SQL_SCRIPTS["check_if_column_exists"][conn_string["db_engine"]]
     conn = get_db_connection(conn_string)
     cursor = conn.cursor()
     cursor.execute(
@@ -116,7 +114,7 @@ def delete_from_columns(
 ):
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = get_db_connection(conn_string)
-    query = SQL_SCRIPTS["delete_from_columns"][DBENGINE]
+    query = SQL_SCRIPTS["delete_from_columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
     cursor.execute(
         query, (server_name, table_catalog, table_schema, table_name, column_name)
@@ -133,7 +131,7 @@ def insert_or_update_columns(
     column_rows = get_columns(db_engine_source)
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = get_db_connection(conn_string)
-    query = SQL_SCRIPTS["insert_columns"][DBENGINE]
+    query = SQL_SCRIPTS["insert_columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
     logger.info(
         "Inserting {} rows into `{}.{}.{}`".format(
@@ -462,8 +460,8 @@ def insert_or_update_uniques(
         table_schema,
         table_name,
     ):
-        query = SQL_SCRIPTS["check_if_unique_exists"][DBENGINE]
         conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["check_if_unique_exists"][conn_string["db_engine"]]
         conn = get_db_connection(conn_string)
         cursor = conn.cursor()
         cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
@@ -1064,7 +1062,7 @@ def explore(db_engine_source: str, level: str):
     conn_string = _utils.get_db_connection_string(db_engine_source)
     conn = get_db_connection(conn_string)
 
-    query = SQL_SCRIPTS["columns"][DBENGINE]
+    query = SQL_SCRIPTS["columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
     cursor.execute(
         query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
