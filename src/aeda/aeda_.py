@@ -37,33 +37,6 @@ def create_database(db_engine: str, section: str = None, overwrite: bool = False
         pass
 
 
-def get_columns(db_engine_source: str):
-    conn_string_source = _utils.get_db_connection_string(db_engine_source)
-    if conn_string_source["db_engine"] == "mysql":
-        column_rows = mysql.get_columns(db_engine_source)
-    else:
-        pass
-    return column_rows
-
-
-def get_tables(db_engine_source: str, db_engine_metadata: str):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        table_rows = mysql.get_tables(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return table_rows
-
-
-def get_uniques(db_engine_source, db_engine_metadata):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        unique_rows = mysql.get_uniques(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return unique_rows
-
-
 def insert_or_update_columns(db_engine_metadata: str, column_rows):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
@@ -73,10 +46,10 @@ def insert_or_update_columns(db_engine_metadata: str, column_rows):
     return
 
 
-def insert_or_update_tables(db_engine_source: str, db_engine_metadata: str, table_rows):
+def insert_or_update_tables(db_engine_source: str, db_engine_metadata: str):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_tables(db_engine_source, db_engine_metadata, table_rows)
+        mysql.insert_or_update_tables(db_engine_source, db_engine_metadata)
     else:
         pass
     return
@@ -138,12 +111,8 @@ def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server
     assert level in EXPLORATION_LEVELS, "{} is not supported.".format(level)
 
     if level == "server":
-        column_rows = get_columns(db_engine_source)
-        insert_or_update_columns(db_engine_metadata, column_rows)
-
-        table_rows = get_tables(db_engine_source, db_engine_metadata)
-        insert_or_update_tables(db_engine_source, db_engine_metadata, table_rows)
-
+        insert_or_update_columns(db_engine_source, db_engine_metadata)
+        insert_or_update_tables(db_engine_source, db_engine_metadata)
         insert_or_update_uniques(db_engine_source, db_engine_metadata)
         insert_or_update_data_values(db_engine_source, db_engine_metadata)
         insert_or_update_dates(db_engine_source, db_engine_metadata)

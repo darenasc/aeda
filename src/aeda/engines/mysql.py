@@ -127,20 +127,23 @@ def delete_from_columns(
     return
 
 
-def insert_or_update_columns(db_engine_metadata: str, rows, overwrite: bool = True):
+def insert_or_update_columns(
+    db_engine_source, db_engine_metadata: str, overwrite: bool = True
+):
+    column_rows = get_columns(db_engine_source)
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = get_db_connection(conn_string)
     query = SQL_SCRIPTS["insert_columns"][DBENGINE]
     cursor = conn.cursor()
     logger.info(
         "Inserting {} rows into `{}.{}.{}`".format(
-            len(rows),
+            len(column_rows),
             conn_string["host"],
             conn_string["catalog"],
             conn_string["schema"],
         )
     )
-    for row in rows:
+    for row in column_rows:
         (
             server_name,
             table_catalog,
@@ -183,7 +186,7 @@ def insert_or_update_columns(db_engine_metadata: str, rows, overwrite: bool = Tr
     cursor.close()
     logger.info(
         "{} rows inserted into `{}.{}.{}`".format(
-            len(rows),
+            len(column_rows),
             conn_string["host"],
             conn_string["catalog"],
             conn_string["schema"],
@@ -271,8 +274,6 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
     conn_string_source = _utils.get_db_connection_string(db_engine_source)
     conn = get_db_connection(conn_string_source)
 
-    # _, _, catalog_name, schema_name = _utils.get_connection_parameters(db_engine_source)
-
     query = SQL_SCRIPTS["number_of_rows"][conn_string_source["db_engine"]]
 
     cursor = conn.cursor()
@@ -287,8 +288,9 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
 
 
 def insert_or_update_tables(
-    db_engine_source: str, db_engine_metadata: str, rows, overwrite: bool = True
+    db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
 ):
+    table_rows = get_tables(db_engine_source, db_engine_metadata)
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
 
     conn = get_db_connection(conn_string_metadata)
@@ -298,7 +300,7 @@ def insert_or_update_tables(
     query_delete = SQL_SCRIPTS["delete_from_tables"][conn_string_metadata["db_engine"]]
     query_update = SQL_SCRIPTS["update_tables"][conn_string_metadata["db_engine"]]
 
-    for row in rows:
+    for row in table_rows:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
             db_engine_source,
