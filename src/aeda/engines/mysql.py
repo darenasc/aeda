@@ -759,9 +759,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         query = SQL_SCRIPTS["get_date_columns"][conn_string_metadata["db_engine"]]
         conn = get_db_connection(conn_string_metadata)
         cursor = conn.cursor()
-        cursor.execute(
-            query, (server_name, catalog_name, schema_name, table_name)
-        )
+        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
         rows = cursor.fetchall()
         cursor.close()
         close_db_connection(conn)
@@ -824,7 +822,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
 
     def insert_many_into_dates(db_engine_metadata: str, data: list):
         conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-        query_insert = SQL_SCRIPTS["insert_into_data_values"][
+        query_insert = SQL_SCRIPTS["insert_into_dates"][
             conn_string_metadata["db_engine"]
         ]
         conn = get_db_connection(conn_string_metadata)
@@ -841,7 +839,9 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
     for table_row in table_rows:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-        column_rows = get_date_columns(db_engine_metadata, server_name, catalog_name, schema_name, table_name)
+        column_rows = get_date_columns(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
+        )
         for column_row in column_rows:
             _, _, _, _, column_name = column_row
             if check_if_dates_exists(
@@ -860,7 +860,9 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
                     table_name,
                     column_name,
                 )
-            date_rows = get_dates(db_engine_source, schema_name, table_name, column_name)
+            date_rows = get_dates(
+                db_engine_source, schema_name, table_name, column_name
+            )
             data = []
             for date_row in date_rows:
                 date_value, frequency = date_row
@@ -881,6 +883,153 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
                 )
             )
             insert_many_into_dates(db_engine_metadata, data)
+
+
+def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
+    def get_numeric_columns(
+        db_engine_metadata, server_name, catalog_name, schema_name, table_name
+    ):
+        """
+        Returns server_name, catalog_name, schema_name, table_name, column_name
+        """
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["get_numeric_columns"][conn_string_metadata["db_engine"]]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+        rows = cursor.fetchall()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def check_if_stats_exists(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["check_if_stats_exists"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name, column_name)
+        )
+        rowcount = cursor.rowcount
+        cursor.close()
+        close_db_connection(conn)
+
+        if rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete_from_stats(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = get_db_connection(conn_string)
+        query = SQL_SCRIPTS["delete_from_stats"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name, column_name)
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    def get_basic_stats(
+        db_engine_source, catalog_name, schema_name, table_name, column_name
+    ):
+        """
+        Returns avg, stdev, var, sum, max, min, range
+        """
+        # .format(column_name, table_catalog, table_schema, table_name)
+        conn_string = _utils.get_db_connection_string(db_engine_source)
+        query = SQL_SCRIPTS["get_basic_stats"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query.format(column_name, schema_name, table_name))
+        rows = cursor.fetchone()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def insert_many_into_stats(db_engine_metadata, data):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["insert_into_stats"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.executemany(
+            query_insert,
+            (data),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    for table_row in table_rows:
+        server_name, catalog_name, schema_name, table_name, n_rows = table_row
+        column_rows = get_numeric_columns(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
+        )
+        data = []
+        for column_row in column_rows:
+            _, _, _, _, column_name = column_row
+            if check_if_stats_exists(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+            ):
+                delete_from_stats(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                )
+            stats_rows = get_basic_stats(
+                db_engine_source, catalog_name, schema_name, table_name, column_name
+            )
+            avg_, stdev_, var_, sum_, max_, min_, range_ = stats_rows
+            data.append(
+                (
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                    float(avg_),
+                    float(stdev_),
+                    float(var_),
+                    float(sum_),
+                    float(max_),
+                    float(min_),
+                    float(range_),
+                )
+            )
+        logger.info(
+            "Inserting {} records into `stats` for {}.{}".format(
+                len(data), schema_name, table_name
+            )
+        )
+        insert_many_into_stats(db_engine_metadata, data)
 
 
 def get_columns(db_engine_source: str):

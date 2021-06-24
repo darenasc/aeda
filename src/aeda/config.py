@@ -14,7 +14,22 @@ SQL_CREATE_SCRIPTS = {
     "mysql": SQL_SCRIPTS_DIR / "mysql" / "mysql.sql",
 }
 
-DATA_TYPES = {"mysql": {"date_types": ["date", "datetime", "timestamp"]}}
+DATA_TYPES = {
+    "mysql": {
+        "date_types": ["date", "datetime", "timestamp"],
+        "numeric_types": [
+            "int",
+            "decimal",
+            "numeric",
+            "float",
+            "money",
+            "tinyint",
+            "bigint",
+            "smallint",
+            "real",
+        ],
+    },
+}
 
 SQL_SCRIPTS = {
     "columns": {
@@ -54,6 +69,10 @@ SQL_SCRIPTS = {
         "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)"""
     },
+    "insert_into_stats": {
+        "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+    },
     "check_if_column_exists": {
         "mysql": """select * from columns
                 WHERE SERVER_NAME = %s
@@ -86,6 +105,15 @@ SQL_SCRIPTS = {
     },
     "check_if_dates_exists": {
         "mysql": """select * from dates
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;"""
+    },
+    "check_if_stats_exists": {
+        "mysql": """select * 
+                    from stats
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
@@ -129,6 +157,14 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;"""
+    },
+    "delete_from_stats": {
+        "mysql": """delete from stats
+                    WHERE SERVER_NAME = %s
+                     AND TABLE_CATALOG = %s
+                     AND TABLE_SCHEMA = %s
+                     AND TABLE_NAME = %s
+                     AND COLUMN_NAME = %s;"""
     },
     "tables": {
         "mysql": """select distinct SERVER_NAME 
@@ -221,10 +257,33 @@ SQL_SCRIPTS = {
                     AND TABLE_NAME = %s
                     AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');"""
     },
+    "get_numeric_columns": {
+        "mysql": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                        from columns 
+                        WHERE SERVER_NAME = %s
+                         AND TABLE_CATALOG = %s
+                         AND TABLE_SCHEMA = %s
+                         AND TABLE_NAME = %s
+                         AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');"""
+    },
     "get_first_day_of_month": {
         "mysql": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
                         , count(*) as N
                     from {1}.{2}
                     group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);"""
+    },
+    "get_basic_stats": {
+        "mysql": """SELECT   CAST(AVG(`{0}`) as FLOAT) AS AVG_
+                            , CAST(STD(`{0}`) as FLOAT) as STDEV_
+                            , CAST(VARIANCE(`{0}`) as FLOAT) as VAR_
+                            , CAST(SUM(`{0}`) as FLOAT) as SUM_
+                            , CAST(MAX(`{0}`) as FLOAT) AS MAX_
+                            , CAST(MIN(`{0}`) as FLOAT) AS MIN_
+                            , CAST(MAX(`{0}`) - MIN(`{0}`) AS FLOAT) as RANGE_
+                    FROM    {1}.{2};"""
     },
 }
