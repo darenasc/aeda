@@ -100,6 +100,15 @@ def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str)
     return
 
 
+def insert_or_update_dates(db_engine_source, db_engine_metadata):
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+    if conn_string_metadata["db_engine"] == "mysql":
+        mysql.insert_or_update_dates(db_engine_source, db_engine_metadata)
+    else:
+        pass
+    return
+
+
 @app.command()
 def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server"):
     """
@@ -128,6 +137,7 @@ def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server
 
         insert_or_update_uniques(db_engine_source, db_engine_metadata)
         insert_or_update_data_values(db_engine_source, db_engine_metadata)
+        insert_or_update_dates(db_engine_source, db_engine_metadata)
 
     return
 

@@ -528,7 +528,18 @@ def insert_or_update_uniques(
             )
 
 
-def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str):
+def insert_or_update_data_values(
+    db_engine_source: str, db_engine_metadata: str, threshold: int = 5_000
+):
+    """
+    Parameters:
+        db_engine_source (str):
+
+        db_engine_metadata (str):
+
+        threshold (int): [Optional] Maximum value of unique values to compute the frequency.
+    """
+
     def check_if_data_value_exists(
         db_engine_metadata,
         server_name,
@@ -636,6 +647,26 @@ def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str)
         close_db_connection(conn)
         return
 
+    def get_num_distinct_values(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+    ):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["get_distinct_values"][conn_string_metadata["db_engine"]]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name, column_name)
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        close_db_connection(conn)
+        return row[0]
+
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
     for table_row in table_rows:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
@@ -645,6 +676,21 @@ def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str)
         )
         for j, column_row in enumerate(column_rows):
             column_name, ordinal_position, data_type = column_row
+            num_uniques = get_num_distinct_values(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+            )
+            if num_uniques > threshold:
+                logger.info(
+                    "{}.{}.{} has {} unique values, more than the threshold {}".format(
+                        table_name, column_name, value, num_uniques, threshold
+                    )
+                )
+                continue
             if check_if_data_value_exists(
                 db_engine_metadata,
                 server_name,
@@ -664,37 +710,177 @@ def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str)
             data_value_rows = get_frequency(
                 db_engine_source, schema_name, table_name, column_name
             )
-            logger.info(
-                "Data values table {}.{} {}/{}".format(table_name, column_name, j, len(column_rows))
-            )
+
             data = []
             for i, data_value in enumerate(data_value_rows):
                 value, num_rows = data_value
                 data.append(
-                    (server_name,
+                    (
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                        value,
+                        num_rows,
+                    )
+                )
+            logger.info(
+                "Inserting {} records into `data_values` for {}.{} {}/{}".format(
+                    len(data), table_name, column_name, j, len(column_rows)
+                )
+            )
+            insert_into_data_values(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+                value,
+                num_rows,
+            )
+            insert_many_into_data_values(db_engine_metadata, data)
+    return
+
+
+def insert_or_update_dates(db_engine_source, db_engine_metadata):
+    def get_date_columns(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+    ):
+        """
+        Returns server_name, table_catalog, table_schema, table_name, column_name
+        """
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["get_date_columns"][conn_string_metadata["db_engine"]]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name)
+        )
+        rows = cursor.fetchall()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def check_if_dates_exists(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["check_if_dates_exists"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name, column_name)
+        )
+        rowcount = cursor.rowcount
+        cursor.close()
+        close_db_connection(conn)
+
+        if rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete_from_dates(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = get_db_connection(conn_string)
+        query = SQL_SCRIPTS["delete_from_dates"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name, column_name)
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    def get_dates(db_engine_source, schema_name, table_name, column_name):
+        conn_string = _utils.get_db_connection_string(db_engine_source)
+        query = SQL_SCRIPTS["get_first_day_of_month"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query.format(column_name, schema_name, table_name))
+        rows = cursor.fetchall()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def insert_many_into_dates(db_engine_metadata: str, data: list):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["insert_into_data_values"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.executemany(
+            query_insert,
+            (data),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    for table_row in table_rows:
+        server_name, catalog_name, schema_name, table_name, n_rows = table_row
+        column_rows = get_date_columns(db_engine_metadata, server_name, catalog_name, schema_name, table_name)
+        for column_row in column_rows:
+            _, _, _, _, column_name = column_row
+            if check_if_dates_exists(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+            ):
+                delete_from_dates(
+                    db_engine_metadata,
+                    server_name,
                     catalog_name,
                     schema_name,
                     table_name,
                     column_name,
-                    value,
-                    num_rows)
                 )
-                # logger.info(
-                #     "Inserting {}/{} into `data_values`.{} {} {}".format(
-                #         i, len(data_value_rows), column_name, value, num_rows
-                #     )
-                # )
-                # insert_into_data_values(
-                #     db_engine_metadata,
-                #     server_name,
-                #     catalog_name,
-                #     schema_name,
-                #     table_name,
-                #     column_name,
-                #     value,
-                #     num_rows,
-                # )
-            insert_many_into_data_values(db_engine_metadata, data)
+            date_rows = get_dates(db_engine_source, schema_name, table_name, column_name)
+            data = []
+            for date_row in date_rows:
+                date_value, frequency = date_row
+                data.append(
+                    (
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                        date_value,
+                        int(frequency),
+                    )
+                )
+            logger.info(
+                "Inserting {} records into `dates` for {}.{}.{}".format(
+                    len(data), table_name, column_name, date_value
+                )
+            )
+            insert_many_into_dates(db_engine_metadata, data)
 
 
 def get_columns(db_engine_source: str):

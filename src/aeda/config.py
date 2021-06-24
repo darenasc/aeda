@@ -14,6 +14,8 @@ SQL_CREATE_SCRIPTS = {
     "mysql": SQL_SCRIPTS_DIR / "mysql" / "mysql.sql",
 }
 
+DATA_TYPES = {"mysql": {"date_types": ["date", "datetime", "timestamp"]}}
+
 SQL_SCRIPTS = {
     "columns": {
         "mysql": """SELECT %s AS SERVER_NAME
@@ -48,6 +50,10 @@ SQL_SCRIPTS = {
         "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     values (%s, %s, %s, %s, %s, %s, %s);"""
     },
+    "insert_into_dates": {
+        "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+    },
     "check_if_column_exists": {
         "mysql": """select * from columns
                 WHERE SERVER_NAME = %s
@@ -72,6 +78,14 @@ SQL_SCRIPTS = {
     },
     "check_if_data_value_exists": {
         "mysql": """select * from data_values
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;"""
+    },
+    "check_if_dates_exists": {
+        "mysql": """select * from dates
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
@@ -108,6 +122,14 @@ SQL_SCRIPTS = {
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;"""
     },
+    "delete_from_dates": {
+        "mysql": """delete from dates
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;"""
+    },
     "tables": {
         "mysql": """select distinct SERVER_NAME 
                     , TABLE_CATALOG 
@@ -120,19 +142,19 @@ SQL_SCRIPTS = {
     },
     "number_of_columns": {
         "mysql": """SELECT %s AS SERVER_NAME
-                , TABLE_CATALOG
-                , TABLE_SCHEMA
-                , TABLE_NAME
-                , COUNT(*) AS N_COLUMNS
-                , NULL AS N_ROWS
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_CATALOG = %s
-                AND TABLE_SCHEMA = %s
-                AND TABLE_NAME = %s
-                GROUP BY TABLE_CATALOG
+                    , TABLE_CATALOG
                     , TABLE_SCHEMA
                     , TABLE_NAME
-                ORDER BY 1,2,3,4;"""
+                    , COUNT(*) AS N_COLUMNS
+                    , NULL AS N_ROWS
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    GROUP BY TABLE_CATALOG
+                        , TABLE_SCHEMA
+                        , TABLE_NAME
+                    ORDER BY 1,2,3,4;"""
     },
     "number_of_rows": {"mysql": """select count(*) as n from {}.{}"""},
     "update_tables": {
@@ -171,10 +193,38 @@ SQL_SCRIPTS = {
                             , sum(case when `{0}` is null then 1 else 0 end) as count_null
                     FROM    {1}.{2}"""
     },
+    "get_distinct_values": {
+        "mysql": """select DISTINCT_VALUES 
+                    from uniques 
+                    where SERVER_NAME = %s
+                        AND TABLE_CATALOG = %s
+                        AND TABLE_SCHEMA = %s
+                        AND TABLE_NAME = %s
+                        AND COLUMN_NAME = %s;"""
+    },
     "get_frequency": {
         "mysql": """SELECT `{0}` AS `{0}`
                         , COUNT(*) AS N 
                     FROM {1}.{2} 
                     GROUP BY `{0}`;"""
+    },
+    "get_date_columns": {
+        "mysql": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                    from columns 
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');"""
+    },
+    "get_first_day_of_month": {
+        "mysql": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
+                        , count(*) as N
+                    from {1}.{2}
+                    group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);"""
     },
 }
