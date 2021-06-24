@@ -9,7 +9,6 @@ from config import (
     SQL_SCRIPTS,
     SUPPORTED_DB_ENGINES,
 )
-from controller import explore_server, explore_table
 from engines import mysql, sqlite3db
 import utils as _utils
 
@@ -56,6 +55,15 @@ def get_tables(db_engine_source: str, db_engine_metadata: str):
     return table_rows
 
 
+def get_uniques(db_engine_source, db_engine_metadata):
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+    if conn_string_metadata["db_engine"] == "mysql":
+        unique_rows = mysql.get_uniques(db_engine_source, db_engine_metadata)
+    else:
+        pass
+    return unique_rows
+
+
 def insert_or_update_columns(db_engine_metadata: str, column_rows):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
@@ -69,6 +77,24 @@ def insert_or_update_tables(db_engine_source: str, db_engine_metadata: str, tabl
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
         mysql.insert_or_update_tables(db_engine_source, db_engine_metadata, table_rows)
+    else:
+        pass
+    return
+
+
+def insert_or_update_uniques(db_engine_source: str, db_engine_metadata: str):
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+    if conn_string_metadata["db_engine"] == "mysql":
+        mysql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
+    else:
+        pass
+    return
+
+
+def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str):
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+    if conn_string_metadata["db_engine"] == "mysql":
+        mysql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
     else:
         pass
     return
@@ -99,6 +125,9 @@ def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server
 
         table_rows = get_tables(db_engine_source, db_engine_metadata)
         insert_or_update_tables(db_engine_source, db_engine_metadata, table_rows)
+
+        insert_or_update_uniques(db_engine_source, db_engine_metadata)
+        insert_or_update_data_values(db_engine_source, db_engine_metadata)
 
     return
 

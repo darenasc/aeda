@@ -5,7 +5,6 @@ import pymysql
 import utils as _utils
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 from pymysql import cursors
-from sql_generator import get_information_schema
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -250,7 +249,9 @@ def get_number_of_columns(
     return row
 
 
-def check_if_table_exists(db_engine_metadata: str, server_name, catalog_name, schema_name, table_name):
+def check_if_table_exists(
+    db_engine_metadata: str, server_name, catalog_name, schema_name, table_name
+):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     query = SQL_SCRIPTS["check_if_table_exists"][conn_string_metadata["db_engine"]]
     conn = get_db_connection(conn_string_metadata)
@@ -300,10 +301,22 @@ def insert_or_update_tables(
     for row in rows:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
-            db_engine_source, db_engine_metadata, server_name, catalog_name, schema_name, table_name
+            db_engine_source,
+            db_engine_metadata,
+            server_name,
+            catalog_name,
+            schema_name,
+            table_name,
         )
-        if check_if_table_exists(db_engine_metadata, server_name, catalog_name, schema_name, table_name) and overwrite:
-            cursor.execute(query_delete, (server_name, catalog_name, schema_name, table_name))
+        if (
+            check_if_table_exists(
+                db_engine_metadata, server_name, catalog_name, schema_name, table_name
+            )
+            and overwrite
+        ):
+            cursor.execute(
+                query_delete, (server_name, catalog_name, schema_name, table_name)
+            )
             conn.commit()
         else:
             continue
@@ -313,14 +326,375 @@ def insert_or_update_tables(
         )
         conn.commit()
         num_rows = get_number_of_rows(db_engine_source, schema_name, table_name)
-        cursor.execute(query_update, (num_rows, server_name, catalog_name, schema_name, table_name))
+        cursor.execute(
+            query_update, (num_rows, server_name, catalog_name, schema_name, table_name)
+        )
         conn.commit()
-
 
     cursor.close()
     close_db_connection(conn)
 
     return
+
+
+def get_uniques(db_engine_source, db_engine_metadata):
+    pass
+
+
+def get_tables_from_metadata(
+    db_engine_source: str, db_engine_metadata: str, n_rows: int = 0
+):
+    """
+    Returns SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME and N_ROWS
+    """
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+    query = SQL_SCRIPTS["get_tables"][conn_string_metadata["db_engine"]]
+
+    _, server_name, catalog_name, schema_name = _utils.get_connection_parameters(
+        db_engine_source
+    )
+
+    conn = get_db_connection(conn_string_metadata)
+    cursor = conn.cursor()
+
+    cursor.execute(query.format(n_rows), (server_name, catalog_name, schema_name))
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    close_db_connection(conn)
+
+    return rows
+
+
+def get_columns_from_metadata(
+    db_engine_metadata, server_name, catalog_name, schema_name, table_name
+):
+    """
+    Returns column_name, ORDINAL_POSITION and DATA_TYPE
+    """
+    conn_string = _utils.get_db_connection_string(db_engine_metadata)
+    query = SQL_SCRIPTS["get_columns"][conn_string["db_engine"]]
+    conn = get_db_connection(conn_string)
+    cursor = conn.cursor()
+    cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+    rows = cursor.fetchall()
+    cursor.close()
+    close_db_connection(conn)
+    return rows
+
+
+def insert_or_update_uniques(
+    db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
+):
+    """
+    Parameters:
+        db_engine_source (str):
+
+        db_engine_metadata (str):
+
+        overwrite (bool): (Optional)
+    """
+
+    def get_unique_values(db_engine_source: str, table_name: str, column_name: str):
+        """
+        Returns `count_distinct` and `count_null`
+        """
+        _, _, _, schema_name = _utils.get_connection_parameters(db_engine_source)
+        conn_string_source = _utils.get_db_connection_string(db_engine_source)
+        conn_source = get_db_connection(conn_string_source)
+
+        query = SQL_SCRIPTS["get_unique_count"][conn_string_source["db_engine"]]
+
+        cursor = conn_source.cursor()
+        cursor.execute(query.format(column_name, schema_name, table_name))
+        rows = cursor.fetchone()
+        cursor.close()
+        close_db_connection(conn_source)
+        return rows
+
+    def insert_into_uniques(
+        db_engine_metadata: str,
+        server_name: str,
+        catalog_name: str,
+        schema_name: str,
+        table_name: str,
+        column_name: str,
+        ordinal_position: str,
+        data_type: str,
+        count_distinct: int,
+        count_null: int,
+    ):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["insert_into_uniques"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.execute(
+            query_insert,
+            (
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+                ordinal_position,
+                data_type,
+                count_distinct,
+                count_null,
+            ),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    def check_if_unique_exists():
+        pass
+
+    def check_if_unique_exists(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+    ):
+        query = SQL_SCRIPTS["check_if_unique_exists"][DBENGINE]
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
+        rowcount = cursor.rowcount
+        cursor.close()
+        close_db_connection(conn)
+
+        if rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete_from_uniques(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = get_db_connection(conn_string)
+        query = SQL_SCRIPTS["delete_from_uniques"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+        cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    _, server_name, catalog_name, schema_name = _utils.get_connection_parameters(
+        db_engine_source
+    )
+
+    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+
+    for row in table_rows:
+        server_name, catalog_name, schema_name, table_name, n_rows = row
+        if check_if_unique_exists(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
+        ):
+            delete_from_uniques(
+                db_engine_metadata, server_name, catalog_name, schema_name, table_name
+            )
+        column_rows = get_columns_from_metadata(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
+        )
+        for column_row in column_rows:
+            column_name, ordinal_position, data_type = column_row
+            count_distinct, count_null = get_unique_values(
+                db_engine_source, table_name, column_name
+            )
+
+            insert_into_uniques(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+                ordinal_position,
+                data_type,
+                int(count_distinct),
+                int(count_null),
+            )
+
+
+def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str):
+    def check_if_data_value_exists(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["check_if_data_value_exists"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, table_catalog, table_schema, table_name, column_name)
+        )
+        rowcount = cursor.rowcount
+        cursor.close()
+        close_db_connection(conn)
+
+        if rowcount > 0:
+            return True
+        else:
+            return False
+
+    def delete_from_data_values(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = get_db_connection(conn_string)
+        query = SQL_SCRIPTS["delete_from_data_values"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, table_catalog, table_schema, table_name, column_name)
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    def get_frequency(db_engine_source, schema_name, table_name, column_name):
+        conn_string = _utils.get_db_connection_string(db_engine_source)
+        query = SQL_SCRIPTS["get_frequency"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query.format(column_name, schema_name, table_name))
+        rows = cursor.fetchall()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def insert_into_data_values(
+        db_engine_metadata,
+        server_name,
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+        value,
+        num_rows,
+    ):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["insert_into_data_values"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.execute(
+            query_insert,
+            (
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+                value,
+                num_rows,
+            ),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    def insert_many_into_data_values(
+        db_engine_metadata,
+        data_value_rows,
+    ):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["insert_into_data_values"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.executemany(
+            query_insert,
+            (list(data_value_rows)),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
+    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    for table_row in table_rows:
+        server_name, catalog_name, schema_name, table_name, n_rows = table_row
+
+        column_rows = get_columns_from_metadata(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
+        )
+        for j, column_row in enumerate(column_rows):
+            column_name, ordinal_position, data_type = column_row
+            if check_if_data_value_exists(
+                db_engine_metadata,
+                server_name,
+                catalog_name,
+                schema_name,
+                table_name,
+                column_name,
+            ):
+                delete_from_data_values(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                )
+            data_value_rows = get_frequency(
+                db_engine_source, schema_name, table_name, column_name
+            )
+            logger.info(
+                "Data values table {}.{} {}/{}".format(table_name, column_name, j, len(column_rows))
+            )
+            data = []
+            for i, data_value in enumerate(data_value_rows):
+                value, num_rows = data_value
+                data.append(
+                    (server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                    value,
+                    num_rows)
+                )
+                # logger.info(
+                #     "Inserting {}/{} into `data_values`.{} {} {}".format(
+                #         i, len(data_value_rows), column_name, value, num_rows
+                #     )
+                # )
+                # insert_into_data_values(
+                #     db_engine_metadata,
+                #     server_name,
+                #     catalog_name,
+                #     schema_name,
+                #     table_name,
+                #     column_name,
+                #     value,
+                #     num_rows,
+                # )
+            insert_many_into_data_values(db_engine_metadata, data)
 
 
 def get_columns(db_engine_source: str):
