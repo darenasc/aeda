@@ -197,15 +197,7 @@ def get_tables(db_engine_source: str, db_engine_metadata: str):
     conn_string_source = _utils.get_db_connection_string(db_engine_source)
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
 
-    # query = SQL_SCRIPTS["tables"][conn_string_metadata["db_engine"]]
-    query = """select distinct SERVER_NAME 
-                    , TABLE_CATALOG 
-                    , TABLE_SCHEMA 
-                    , TABLE_NAME
-                    from columns
-                    where SERVER_NAME = %s
-                    AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s;"""
+    query = SQL_SCRIPTS["tables"][conn_string_metadata["db_engine"]]
 
     conn = get_db_connection(conn_string_metadata)
     cursor = conn.cursor()

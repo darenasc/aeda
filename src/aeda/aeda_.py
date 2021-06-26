@@ -96,13 +96,15 @@ def insert_or_update_stats(
 
 
 @app.command()
-def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server"):
+def explore(source: str, metadata: str, level: str = "server"):
     """
     Parameters:
         db_engine (str):
 
         level (str): ['server', 'catalog', 'schema', 'table', 'view', 'query']
     """
+    db_engine_source = source
+    db_engine_metadata = metadata
     conn_string_source = _utils.get_db_connection_string(db_engine_source)
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
 
@@ -115,11 +117,11 @@ def explore(db_engine_source: str, db_engine_metadata: str, level: str = "server
     assert level in EXPLORATION_LEVELS, "{} is not supported.".format(level)
 
     if level == "server":
-        # insert_or_update_columns(db_engine_source, db_engine_metadata)
-        # insert_or_update_tables(db_engine_source, db_engine_metadata)
-        # insert_or_update_uniques(db_engine_source, db_engine_metadata)
-        # insert_or_update_data_values(db_engine_source, db_engine_metadata)
-        # insert_or_update_dates(db_engine_source, db_engine_metadata)
+        insert_or_update_columns(db_engine_source, db_engine_metadata)
+        insert_or_update_tables(db_engine_source, db_engine_metadata)
+        insert_or_update_uniques(db_engine_source, db_engine_metadata)
+        insert_or_update_data_values(db_engine_source, db_engine_metadata)
+        insert_or_update_dates(db_engine_source, db_engine_metadata)
         insert_or_update_stats(
             db_engine_source, db_engine_metadata, with_percentiles=True
         )
