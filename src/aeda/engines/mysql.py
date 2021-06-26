@@ -885,7 +885,9 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
             insert_many_into_dates(db_engine_metadata, data)
 
 
-def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
+def insert_or_update_stats(
+    db_engine_source: str, db_engine_metadata: str, with_percentiles: bool = False
+):
     def get_numeric_columns(
         db_engine_metadata, server_name, catalog_name, schema_name, table_name
     ):
@@ -979,6 +981,33 @@ def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
         close_db_connection(conn)
         return
 
+    def get_percentiles(db_engine_source, schema_name, table_name, column_name):
+        conn_string = _utils.get_db_connection_string(db_engine_source)
+        query = SQL_SCRIPTS["get_percentiles"][conn_string["db_engine"]]
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query.format(column_name, schema_name, table_name))
+        rows = cursor.fetchone()
+        cursor.close()
+        close_db_connection(conn)
+        return rows
+
+    def update_percentiles(db_engine_metadata, data):
+        conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+        query_insert = SQL_SCRIPTS["update_percentiles"][
+            conn_string_metadata["db_engine"]
+        ]
+        conn = get_db_connection(conn_string_metadata)
+        cursor = conn.cursor()
+        cursor.executemany(
+            query_insert,
+            (data),
+        )
+        conn.commit()
+        cursor.close()
+        close_db_connection(conn)
+        return
+
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
     for table_row in table_rows:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
@@ -986,6 +1015,8 @@ def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
         data = []
+        if with_percentiles:
+            percentiles = []
         for column_row in column_rows:
             _, _, _, _, column_name = column_row
             if check_if_stats_exists(
@@ -1007,6 +1038,45 @@ def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
             stats_rows = get_basic_stats(
                 db_engine_source, catalog_name, schema_name, table_name, column_name
             )
+            if with_percentiles:
+                percentile_rows = get_percentiles(
+                    db_engine_source, schema_name, table_name, column_name
+                )
+                (
+                    p01,
+                    p025,
+                    p05,
+                    p10,
+                    q2,
+                    q3,
+                    q4,
+                    p90,
+                    p95,
+                    p975,
+                    p99,
+                    iqr,
+                ) = percentile_rows
+                percentiles.append(
+                    (
+                        p01,
+                        p025,
+                        p05,
+                        p10,
+                        q2,
+                        q3,
+                        q4,
+                        p90,
+                        p95,
+                        p975,
+                        p99,
+                        iqr,
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                    )
+                )
             avg_, stdev_, var_, sum_, max_, min_, range_ = stats_rows
             data.append(
                 (
@@ -1030,6 +1100,8 @@ def insert_or_update_stats(db_engine_source: str, db_engine_metadata: str):
             )
         )
         insert_many_into_stats(db_engine_metadata, data)
+        if with_percentiles:
+            update_percentiles(db_engine_metadata, percentiles)
 
 
 def get_columns(db_engine_source: str):
