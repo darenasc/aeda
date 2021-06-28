@@ -290,6 +290,7 @@ def insert_or_update_tables(
     query_update = SQL_SCRIPTS["update_tables"][conn_string_metadata["db_engine"]]
 
     table_rows = get_tables(db_engine_source, db_engine_metadata)
+    logger.info('{} tables to be inserted into `tables`'.format(len(table_rows)))
     for row in table_rows:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
@@ -323,6 +324,8 @@ def insert_or_update_tables(
 
     cursor.close()
     close_db_connection(conn)
+
+    logger.info('{} tables inserted into `tables`'.format(len(table_rows)))
 
     return
 
@@ -440,9 +443,6 @@ def insert_or_update_uniques(
         close_db_connection(conn)
         return
 
-    def check_if_unique_exists():
-        pass
-
     def check_if_unique_exists(
         db_engine_metadata,
         server_name,
@@ -487,6 +487,8 @@ def insert_or_update_uniques(
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
 
+    logger.info('{} tables counting unique and null values'.format(len(table_rows)))
+
     for row in table_rows:
         server_name, catalog_name, schema_name, table_name, n_rows = row
         if check_if_unique_exists(
@@ -516,6 +518,7 @@ def insert_or_update_uniques(
                 int(count_distinct),
                 int(count_null),
             )
+        logger.info('{} columns inserted into `uniques`'.format(len(column_rows)))
 
 
 def insert_or_update_data_values(
@@ -717,19 +720,19 @@ def insert_or_update_data_values(
                 )
             logger.info(
                 "Inserting {} records into `data_values` for {}.{} {}/{}".format(
-                    len(data), table_name, column_name, j, len(column_rows)
+                    len(data), table_name, column_name, j + 1, len(column_rows)
                 )
             )
-            insert_into_data_values(
-                db_engine_metadata,
-                server_name,
-                catalog_name,
-                schema_name,
-                table_name,
-                column_name,
-                value,
-                num_rows,
-            )
+            # insert_into_data_values(
+            #     db_engine_metadata,
+            #     server_name,
+            #     catalog_name,
+            #     schema_name,
+            #     table_name,
+            #     column_name,
+            #     value,
+            #     num_rows,
+            # )
             insert_many_into_data_values(db_engine_metadata, data)
     return
 

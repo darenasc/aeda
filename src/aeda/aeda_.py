@@ -9,7 +9,8 @@ from config import (
     SQL_SCRIPTS,
     SUPPORTED_DB_ENGINES,
 )
-from engines import mysql, sqlite3db
+from engines import mysql, sqlite3db, postgres
+import sql as _sql
 import utils as _utils
 
 FORMAT = "%(asctime)-15s %(message)s"
@@ -41,6 +42,8 @@ def insert_or_update_columns(db_engine_metadata: str, column_rows):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
         mysql.insert_or_update_columns(db_engine_metadata, column_rows)
+    elif conn_string_metadata["db_engine"] == "postgres":
+        postgres.insert_or_update_columns(db_engine_metadata, column_rows)
     else:
         pass
     return
@@ -50,6 +53,8 @@ def insert_or_update_tables(db_engine_source: str, db_engine_metadata: str):
     conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
     if conn_string_metadata["db_engine"] == "mysql":
         mysql.insert_or_update_tables(db_engine_source, db_engine_metadata)
+    elif conn_string_metadata["db_engine"] == "postgres":
+        postgres.insert_or_update_tables(db_engine_source, db_engine_metadata)
     else:
         pass
     return
@@ -117,12 +122,12 @@ def explore(source: str, metadata: str, level: str = "server"):
     assert level in EXPLORATION_LEVELS, "{} is not supported.".format(level)
 
     if level == "server":
-        insert_or_update_columns(db_engine_source, db_engine_metadata)
-        insert_or_update_tables(db_engine_source, db_engine_metadata)
-        insert_or_update_uniques(db_engine_source, db_engine_metadata)
-        insert_or_update_data_values(db_engine_source, db_engine_metadata)
-        insert_or_update_dates(db_engine_source, db_engine_metadata)
-        insert_or_update_stats(
+        _sql.insert_or_update_columns(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_tables(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_dates(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_stats(
             db_engine_source, db_engine_metadata, with_percentiles=True
         )
 

@@ -12,7 +12,6 @@ docker run \
     -e MYSQL_ROOT_PASSWORD=rootpassword \
     -e MYSQL_DATABASE=metadata \
     -d mysql:8.0
-
 ```
 
 Then you need to copy the test database and load it.
@@ -27,4 +26,21 @@ To create the `metadata` database in the container you need to run the following
 ```
 docker cp src/aeda/sql_scripts/mysql/mysql.sql mysql-demo:/tmp \
 && docker exec -it mysql-demo sh -c "mysql -prootpassword < /tmp/mysql.sql"
+```
+
+# Postgres database
+
+```
+docker run \
+    --name postgres-demo \
+    -p 6604:5432 \
+    --rm \
+    -e POSTGRES_PASSWORD=demo \
+    -e POSTGRES_USER=demo \
+    -e POSTGRES_DB=world \
+    -d postgres:12.4
+```
+
+```
+docker exec -i postgres-demo psql -U demo -d world --quiet < src/aeda/sql_scripts/postgres/world.sql
 ```

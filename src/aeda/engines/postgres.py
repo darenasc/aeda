@@ -1,6 +1,6 @@
 import logging
 
-import pymysql
+import psycopg2
 
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 import utils as _utils
@@ -38,11 +38,11 @@ def create_database(section):
 # def get_db_connection(conn_string):
 #     conn = None
 #     try:
-#         conn = pymysql.connect(
+#         conn = psycopg2.connect(
 #             host=conn_string["host"],
 #             user=conn_string["user"],
 #             password=conn_string["password"],
-#             database=conn_string["schema"],
+#             dbname=conn_string["catalog"],
 #             port=int(conn_string["port"]),
 #         )
 #     except Exception:
@@ -209,10 +209,20 @@ def get_tables(db_engine_source: str, db_engine_metadata: str):
             conn_string_source["schema"],
         ),
     )
+    print(
+        cursor.mogrify(
+            query,
+            (
+                conn_string_source["host"],
+                conn_string_source["catalog"],
+                conn_string_source["schema"],
+            ),
+        )
+    )
     rows = cursor.fetchall()
 
     cursor.close()
-    conn.close()
+    close_db_connection(conn)
 
     return rows
 
@@ -237,7 +247,7 @@ def get_number_of_columns(
     row = cursor.fetchone()
 
     cursor.close()
-    conn.close()
+    close_db_connection(conn)
 
     return row
 
@@ -310,6 +320,8 @@ def insert_or_update_tables(
                 query_delete, (server_name, catalog_name, schema_name, table_name)
             )
             conn.commit()
+        else:
+            continue
         cursor.execute(
             query_insert,
             (server_name, catalog_name, schema_name, table_name, n_columns, n_rows),
@@ -944,7 +956,6 @@ def insert_or_update_stats(
         """
         Returns avg, stdev, var, sum, max, min, range
         """
-        # .format(column_name, table_catalog, table_schema, table_name)
         conn_string = _utils.get_db_connection_string(db_engine_source)
         query = SQL_SCRIPTS["get_basic_stats"][conn_string["db_engine"]]
         conn = _utils.get_db_connection(conn_string)

@@ -6,7 +6,7 @@ SQLITE3_DB_DIR = AEDA_DIR / "metadata" / "aeda_metadata.db"
 SQL_SCRIPTS_DIR = AEDA_DIR / "sql_scripts"
 CONFIG_DB = AEDA_DIR / "connection_strings" / "databases.ini"
 
-SUPPORTED_DB_ENGINES = ["sqlite3", "mysql"]
+SUPPORTED_DB_ENGINES = ["sqlite3", "mysql", "postgres"]
 EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 
 SQL_CREATE_SCRIPTS = {
@@ -34,44 +34,71 @@ DATA_TYPES = {
 SQL_SCRIPTS = {
     "columns": {
         "mysql": """SELECT %s AS SERVER_NAME
-                    , C.TABLE_CATALOG
-                    , C.TABLE_SCHEMA
-                    , C.TABLE_NAME
-                    , C.COLUMN_NAME
-                    , C.ORDINAL_POSITION
-                    , C.DATA_TYPE
-                FROM INFORMATION_SCHEMA.COLUMNS AS C 
-                    INNER JOIN INFORMATION_SCHEMA.TABLES AS T
-                ON C.TABLE_CATALOG = T.TABLE_CATALOG
-                AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-                AND C.TABLE_NAME = T.TABLE_NAME
-                AND T.TABLE_TYPE = 'BASE TABLE'
-                AND T.TABLE_CATALOG = %s
-                AND T.TABLE_SCHEMA = %s;"""
+                            , C.TABLE_CATALOG
+                            , C.TABLE_SCHEMA
+                            , C.TABLE_NAME
+                            , C.COLUMN_NAME
+                            , C.ORDINAL_POSITION
+                            , C.DATA_TYPE
+                    FROM INFORMATION_SCHEMA.COLUMNS AS C 
+                        INNER JOIN INFORMATION_SCHEMA.TABLES AS T
+                    ON C.TABLE_CATALOG = T.TABLE_CATALOG
+                    AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+                    AND C.TABLE_NAME = T.TABLE_NAME
+                    AND T.TABLE_TYPE = 'BASE TABLE'
+                    AND T.TABLE_CATALOG = %s
+                    AND T.TABLE_SCHEMA = %s;""",
+        "postgres": """SELECT %s AS SERVER_NAME
+                                , C.TABLE_CATALOG
+                                , C.TABLE_SCHEMA
+                                , C.TABLE_NAME
+                                , C.COLUMN_NAME
+                                , C.ORDINAL_POSITION
+                                , C.DATA_TYPE
+                        FROM INFORMATION_SCHEMA.COLUMNS AS C 
+                            INNER JOIN INFORMATION_SCHEMA.TABLES AS T
+                        ON C.TABLE_CATALOG = T.TABLE_CATALOG
+                        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+                        AND C.TABLE_NAME = T.TABLE_NAME
+                        AND T.TABLE_TYPE = 'BASE TABLE'
+                        AND T.TABLE_CATALOG = %s
+                        AND T.TABLE_SCHEMA = %s;""",
     },
     "insert_columns": {
         "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (%s, %s, %s, %s, %s, %s, %s);"""
+                    values (%s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
+                    values (%s, %s, %s, %s, %s, %s, %s);""",
     },
     "insert_into_tables": {
         "mysql": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (%s, %s, %s, %s, %s, %s);"""
+                    values (%s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
+                    values (%s, %s, %s, %s, %s, %s);""",
     },
     "insert_into_uniques": {
         "mysql": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        "postgres": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
     },
     "insert_into_data_values": {
         "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (%s, %s, %s, %s, %s, %s, %s);"""
+                    values (%s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
+                    values (%s, %s, %s, %s, %s, %s, %s);""",
     },
     "insert_into_dates": {
         "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        "postgres": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
     },
     "insert_into_stats": {
         "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
+                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
     },
     "check_if_column_exists": {
         "mysql": """select * from columns
@@ -79,21 +106,37 @@ SQL_SCRIPTS = {
                 AND TABLE_CATALOG = %s
                 AND TABLE_SCHEMA = %s
                 AND TABLE_NAME = %s
-                AND COLUMN_NAME = %s;"""
+                AND COLUMN_NAME = %s;""",
+        "postgres": """select * from columns
+                WHERE SERVER_NAME = %s
+                AND TABLE_CATALOG = %s
+                AND TABLE_SCHEMA = %s
+                AND TABLE_NAME = %s
+                AND COLUMN_NAME = %s;""",
     },
     "check_if_table_exists": {
         "mysql": """select * from tables
                 WHERE SERVER_NAME = %s
                 AND TABLE_CATALOG = %s
                 AND TABLE_SCHEMA = %s
-                AND TABLE_NAME = %s;"""
+                AND TABLE_NAME = %s;""",
+        "postgres": """select * from tables
+                WHERE SERVER_NAME = %s
+                AND TABLE_CATALOG = %s
+                AND TABLE_SCHEMA = %s
+                AND TABLE_NAME = %s;""",
     },
     "check_if_unique_exists": {
         "mysql": """select * from uniques
             WHERE SERVER_NAME = %s
              AND TABLE_CATALOG = %s
              AND TABLE_SCHEMA = %s
-             AND TABLE_NAME = %s;"""
+             AND TABLE_NAME = %s;""",
+        "postgres": """select * from uniques
+            WHERE SERVER_NAME = %s
+             AND TABLE_CATALOG = %s
+             AND TABLE_SCHEMA = %s
+             AND TABLE_NAME = %s;""",
     },
     "check_if_data_value_exists": {
         "mysql": """select * from data_values
@@ -101,7 +144,13 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """select * from data_values
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "check_if_dates_exists": {
         "mysql": """select * from dates
@@ -109,7 +158,13 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """select * from dates
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "check_if_stats_exists": {
         "mysql": """select * 
@@ -118,7 +173,14 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """select * 
+                    from stats
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "delete_from_columns": {
         "mysql": """delete from columns
@@ -126,21 +188,37 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """delete from columns
+                WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "delete_from_tables": {
         "mysql": """delete from tables
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s;"""
+                    AND TABLE_NAME = %s;""",
+        "postgres": """delete from tables
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s;""",
     },
     "delete_from_uniques": {
         "mysql": """delete from uniques
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s;"""
+                    AND TABLE_NAME = %s;""",
+        "postgres": """delete from uniques
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s;""",
     },
     "delete_from_data_values": {
         "mysql": """delete from data_values
@@ -148,7 +226,13 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """delete from data_values
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "delete_from_dates": {
         "mysql": """delete from dates
@@ -156,7 +240,13 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """delete from dates
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
     },
     "delete_from_stats": {
         "mysql": """delete from stats
@@ -164,7 +254,13 @@ SQL_SCRIPTS = {
                      AND TABLE_CATALOG = %s
                      AND TABLE_SCHEMA = %s
                      AND TABLE_NAME = %s
-                     AND COLUMN_NAME = %s;"""
+                     AND COLUMN_NAME = %s;""",
+        "postgres": """delete from stats
+                    WHERE SERVER_NAME = %s
+                     AND TABLE_CATALOG = %s
+                     AND TABLE_SCHEMA = %s
+                     AND TABLE_NAME = %s
+                     AND COLUMN_NAME = %s;""",
     },
     "tables": {
         "mysql": """select distinct SERVER_NAME 
@@ -174,7 +270,15 @@ SQL_SCRIPTS = {
                     from columns
                     where SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s;"""
+                    AND TABLE_SCHEMA = %s;""",
+        "postgres": """select distinct SERVER_NAME 
+                    , TABLE_CATALOG 
+                    , TABLE_SCHEMA 
+                    , TABLE_NAME
+                    from columns
+                    where SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s;""",
     },
     "number_of_columns": {
         "mysql": """SELECT %s AS SERVER_NAME
@@ -190,16 +294,39 @@ SQL_SCRIPTS = {
                     GROUP BY TABLE_CATALOG
                         , TABLE_SCHEMA
                         , TABLE_NAME
-                    ORDER BY 1,2,3,4;"""
+                    ORDER BY 1,2,3,4;""",
+        "postgres": """SELECT %s AS SERVER_NAME
+                    , TABLE_CATALOG
+                    , TABLE_SCHEMA
+                    , TABLE_NAME
+                    , COUNT(*) AS N_COLUMNS
+                    , NULL AS N_ROWS
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    GROUP BY TABLE_CATALOG
+                        , TABLE_SCHEMA
+                        , TABLE_NAME
+                    ORDER BY 1,2,3,4;""",
     },
-    "number_of_rows": {"mysql": """select count(*) as n from {}.{}"""},
+    "number_of_rows": {
+        "mysql": """select count(*) as n from {}.{}""",
+        "postgres": """select count(*) as n from {}.{}""",
+    },
     "update_tables": {
         "mysql": """UPDATE tables 
                     SET N_ROWS = %s
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s;"""
+                    AND TABLE_NAME = %s;""",
+        "postgres": """UPDATE tables 
+                    SET N_ROWS = %s
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s;""",
     },
     "get_tables": {
         "mysql": """select distinct SERVER_NAME 
@@ -212,7 +339,18 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                         and N_ROWS > {}
-                    order by N_ROWS;"""
+                    order by N_ROWS;""",
+        "postgres": """select distinct SERVER_NAME 
+                    , TABLE_CATALOG 
+                    , TABLE_SCHEMA 
+                    , TABLE_NAME
+                    , N_ROWS
+                    from tables
+                    where SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                        and N_ROWS > {}
+                    order by N_ROWS;""",
     },
     "get_columns": {
         "mysql": """select column_name
@@ -222,12 +360,23 @@ SQL_SCRIPTS = {
                     WHERE SERVER_NAME = %s
                         AND TABLE_CATALOG = %s
                         AND TABLE_SCHEMA = %s
-                        AND TABLE_NAME = %s;"""
+                        AND TABLE_NAME = %s;""",
+        "postgres": """select column_name
+                        , ORDINAL_POSITION
+                        , DATA_TYPE 
+                    from columns
+                    WHERE SERVER_NAME = %s
+                        AND TABLE_CATALOG = %s
+                        AND TABLE_SCHEMA = %s
+                        AND TABLE_NAME = %s;""",
     },
     "get_unique_count": {
         "mysql": """select count(distinct `{0}`) as count_distinct
                             , sum(case when `{0}` is null then 1 else 0 end) as count_null
-                    FROM    {1}.{2}"""
+                    FROM    {1}.{2}""",
+        "postgres": """select count(distinct "{0}") as count_distinct
+                            , sum(case when "{0}" is null then 1 else 0 end) as count_null
+                    FROM    {1}.{2}""",
     },
     "get_distinct_values": {
         "mysql": """select DISTINCT_VALUES 
@@ -236,13 +385,24 @@ SQL_SCRIPTS = {
                         AND TABLE_CATALOG = %s
                         AND TABLE_SCHEMA = %s
                         AND TABLE_NAME = %s
-                        AND COLUMN_NAME = %s;"""
+                        AND COLUMN_NAME = %s;""",
+        "postgres": """select DISTINCT_VALUES 
+                    from uniques 
+                    where SERVER_NAME = %s
+                        AND TABLE_CATALOG = %s
+                        AND TABLE_SCHEMA = %s
+                        AND TABLE_NAME = %s
+                        AND COLUMN_NAME = %s;""",
     },
     "get_frequency": {
         "mysql": """SELECT `{0}` AS `{0}`
                         , COUNT(*) AS N 
                     FROM {1}.{2} 
-                    GROUP BY `{0}`;"""
+                    GROUP BY `{0}`;""",
+        "postgres": """SELECT "{0}" AS "{0}"
+                        , COUNT(*) AS N 
+                    FROM {1}.{2} 
+                    GROUP BY "{0}";""",
     },
     "get_date_columns": {
         "mysql": """select server_name
@@ -255,7 +415,18 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');"""
+                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "postgres": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                    from columns 
+                    WHERE SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
     },
     "get_numeric_columns": {
         "mysql": """select server_name
@@ -268,7 +439,18 @@ SQL_SCRIPTS = {
                          AND TABLE_CATALOG = %s
                          AND TABLE_SCHEMA = %s
                          AND TABLE_NAME = %s
-                         AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');"""
+                         AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');""",
+        "postgres": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                        from columns 
+                        WHERE SERVER_NAME = %s
+                         AND TABLE_CATALOG = %s
+                         AND TABLE_SCHEMA = %s
+                         AND TABLE_NAME = %s
+                         AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');""",
     },
     "get_first_day_of_month": {
         "mysql": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
@@ -284,7 +466,15 @@ SQL_SCRIPTS = {
                             , CAST(MAX(`{0}`) as FLOAT) AS MAX_
                             , CAST(MIN(`{0}`) as FLOAT) AS MIN_
                             , CAST(MAX(`{0}`) - MIN(`{0}`) AS FLOAT) as RANGE_
-                    FROM    {1}.{2};"""
+                    FROM    {1}.{2};""",
+        "postgres": """SELECT   AVG("{0}") AS AVG_
+                                , stddev("{0}") as STDEV_
+                                , VARIANCE("{0}") as VAR_
+                                , SUM("{0}") as SUM_
+                                , MAX("{0}") AS MAX_
+                                , MIN("{0}") AS MIN_
+                                , MAX("{0}") - MIN("{0}") as RANGE_
+                        FROM {1}.{2};"""
     },
     "get_percentiles": {
         "mysql": """with cte1 as 
@@ -316,7 +506,20 @@ SQL_SCRIPTS = {
                             , (select min(`{0}`) as P95 from cte1 where n_tile = 190) as t190
                             , (select min(`{0}`) as P975 from cte1 where n_tile = 195) as t195
                             , (select min(`{0}`) as P99 from cte1 where n_tile = 198) as t198;
-                    """
+                    """,
+        "postgres": """select   percentile_disc(0.01) within group (order by "{0}") as P01
+                                , percentile_disc(0.025) within group (order by "{0}") as P025
+                                , percentile_disc(0.05) within group (order by "{0}") as P05
+                                , percentile_disc(0.1) within group (order by "{0}") as P10
+                                , percentile_disc(0.25) within group (order by "{0}") as Q1
+                                , percentile_disc(0.5) within group (order by "{0}") as Q2
+                                , percentile_disc(0.75) within group (order by "{0}") as Q3
+                                , percentile_disc(0.90) within group (order by "{0}") as P90
+                                , percentile_disc(0.95) within group (order by "{0}") as P95
+                                , percentile_disc(0.975) within group (order by "{0}") as P975
+                                , percentile_disc(0.99) within group (order by "{0}") as P99
+                                , percentile_disc(0.975) within group (order by "{0}") - percentile_disc(0.25) within group (order by "{0}") as IQR
+                        from {1}.{2}"""
     },
     "update_percentiles": {
         "mysql": """update stats set P01 = %s
