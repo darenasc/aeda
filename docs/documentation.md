@@ -42,5 +42,17 @@ docker run \
 ```
 
 ```
-docker exec -i postgres-demo psql -U demo -d world --quiet < src/aeda/sql_scripts/postgres/world.sql
+docker exec -i \
+    postgres-demo \
+    psql -U demo \
+        -d world \
+        --quiet \
+        < src/aeda/sql_scripts/postgres/world.sql
+
+docker exec -i \
+    postgres-demo \
+    psql -U demo \
+        -d world \
+        --quiet \
+        < src/aeda/sql_scripts/postgres/postgres.sql
 ```

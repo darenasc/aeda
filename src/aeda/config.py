@@ -12,6 +12,7 @@ EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 SQL_CREATE_SCRIPTS = {
     "sqlite3": SQL_SCRIPTS_DIR / "sqlite3" / "sqlite3.sql",
     "mysql": SQL_SCRIPTS_DIR / "mysql" / "mysql.sql",
+    "postgres": SQL_SCRIPTS_DIR / "postgres" / "postgres.sql",
 }
 
 DATA_TYPES = {
@@ -97,7 +98,7 @@ SQL_SCRIPTS = {
     "insert_into_stats": {
         "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
-        "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
+        "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
     },
     "check_if_column_exists": {
@@ -527,7 +528,24 @@ SQL_SCRIPTS = {
                     , P05 = %s
                     , P10 = %s
                     , Q1  = %s
-                    , Q2  = %s
+                    , Q2  = %s 
+                    , Q3  = %s
+                    , P90  = %s
+                    , P95  = %s
+                    , P975 = %s
+                    , P99  = %s
+                    , IQR  = %s
+                    where SERVER_NAME = %s
+                    AND TABLE_CATALOG = %s
+                    AND TABLE_SCHEMA = %s
+                    AND TABLE_NAME = %s
+                    AND COLUMN_NAME = %s;""",
+        "postgres": """update stats set P01 = %s
+                    , P025 = %s
+                    , P05 = %s
+                    , P10 = %s
+                    , Q1  = %s
+                    , Q2  = %s 
                     , Q3  = %s
                     , P90  = %s
                     , P95  = %s
