@@ -475,7 +475,7 @@ SQL_SCRIPTS = {
                                 , MAX("{0}") AS MAX_
                                 , MIN("{0}") AS MIN_
                                 , MAX("{0}") - MIN("{0}") as RANGE_
-                        FROM {1}.{2};"""
+                        FROM {1}.{2};""",
     },
     "get_percentiles": {
         "mysql": """with cte1 as 
@@ -520,7 +520,7 @@ SQL_SCRIPTS = {
                                 , percentile_disc(0.975) within group (order by "{0}") as P975
                                 , percentile_disc(0.99) within group (order by "{0}") as P99
                                 , percentile_disc(0.975) within group (order by "{0}") - percentile_disc(0.25) within group (order by "{0}") as IQR
-                        from {1}.{2}"""
+                        from {1}.{2}""",
     },
     "update_percentiles": {
         "mysql": """update stats set P01 = %s
@@ -556,6 +556,6 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;"""
+                    AND COLUMN_NAME = %s;""",
     },
 }

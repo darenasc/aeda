@@ -30,73 +30,12 @@ def create_database(db_engine: str, section: str = None, overwrite: bool = False
     """
     assert db_engine in SUPPORTED_DB_ENGINES, "{} is not supported.".format(db_engine)
 
-    if db_engine == "sqlite3":
-        sqlite3db.create_database(overwrite=overwrite)
-    elif db_engine == "mysql":
-        mysql.create_database(section)
-    else:
-        pass
-
-
-def insert_or_update_columns(db_engine_metadata: str, column_rows):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_columns(db_engine_metadata, column_rows)
-    elif conn_string_metadata["db_engine"] == "postgres":
-        postgres.insert_or_update_columns(db_engine_metadata, column_rows)
-    else:
-        pass
-    return
-
-
-def insert_or_update_tables(db_engine_source: str, db_engine_metadata: str):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_tables(db_engine_source, db_engine_metadata)
-    elif conn_string_metadata["db_engine"] == "postgres":
-        postgres.insert_or_update_tables(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return
-
-
-def insert_or_update_uniques(db_engine_source: str, db_engine_metadata: str):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return
-
-
-def insert_or_update_data_values(db_engine_source: str, db_engine_metadata: str):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return
-
-
-def insert_or_update_dates(db_engine_source: str, db_engine_metadata: str):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_dates(db_engine_source, db_engine_metadata)
-    else:
-        pass
-    return
-
-
-def insert_or_update_stats(
-    db_engine_source: str, db_engine_metadata: str, with_percentiles: bool = False
-):
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
-    if conn_string_metadata["db_engine"] == "mysql":
-        mysql.insert_or_update_stats(
-            db_engine_source, db_engine_metadata, with_percentiles
-        )
-    else:
-        pass
+    # if db_engine == "sqlite3":
+    #     sqlite3db.create_database(overwrite=overwrite)
+    # elif db_engine == "mysql":
+    _sql.create_database(section)
+    # else:
+    #     pass
     return
 
 

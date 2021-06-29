@@ -1,6 +1,7 @@
 import logging
+from pathlib import Path
 
-import pymysql
+import sqlite3
 
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 import utils as _utils
@@ -12,48 +13,31 @@ logger = logging.getLogger(__name__)
 
 
 def create_database(section):
-    logger.info("Creating database in MySQL")
-
     conn_string = _utils.get_db_connection_string(section)
     conn = _utils.get_db_connection(conn_string)
 
-    with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
-        sql_script = f.read()
-        scripts = sql_script.split(";")
-        scripts = [x for x in sql_script.split(";") if len(x.strip()) > 0]
-    cursor = conn.cursor()
+    logger.info("Creating a {} database".format(conn_string["db_engine"]))
 
-    for script in scripts:
-        cursor.execute(script)
-        conn.commit()
-    cursor.close()
+    if conn_string["db_engine"] in ["mysql", "postgres"]:
+        with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
+            sql_script = f.read()
+            scripts = sql_script.split(";")
+            scripts = [x for x in sql_script.split(";") if len(x.strip()) > 0]
+        cursor = conn.cursor()
 
-    close_db_connection(conn)
+        for script in scripts:
+            cursor.execute(script)
+            conn.commit()
+        cursor.close()
 
-    logger.info("Database created in MySQL")
+        conn.close()
+    elif conn_string["db_engine"] == "sqlite3":
+        # sqlite3.connect()
+        print(Path(conn_string['folder']))
+        print(Path(conn_string['schema'] + '.db'))
 
-    return
+    logger.info("A {} database created".format(conn_string["db_engine"]))
 
-
-# def get_db_connection(conn_string):
-#     conn = None
-#     try:
-#         conn = pymysql.connect(
-#             host=conn_string["host"],
-#             user=conn_string["user"],
-#             password=conn_string["password"],
-#             database=conn_string["schema"],
-#             port=int(conn_string["port"]),
-#         )
-#     except Exception:
-#         logger.error("Database connection error")
-#         raise
-#     return conn
-
-
-def close_db_connection(conn):
-    conn.close()
-    # logger.info("MySQL database connection closed")
     return
 
 
@@ -96,7 +80,7 @@ def check_if_record_exists(
     )
     rowcount = cursor.rowcount
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
     if rowcount > 0:
         return False
@@ -121,7 +105,7 @@ def delete_from_columns(
     )
     conn.commit()
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
     return
 
 
@@ -252,7 +236,7 @@ def check_if_table_exists(
     cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
     rowcount = cursor.rowcount
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
     return True if rowcount > 0 else False
 
 
@@ -272,7 +256,7 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
     num_rows = cursor.fetchone()
 
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
     return num_rows
 
@@ -290,7 +274,7 @@ def insert_or_update_tables(
     query_update = SQL_SCRIPTS["update_tables"][conn_string_metadata["db_engine"]]
 
     table_rows = get_tables(db_engine_source, db_engine_metadata)
-    logger.info('{} tables to be inserted into `tables`'.format(len(table_rows)))
+    logger.info("{} tables to be inserted into `tables`".format(len(table_rows)))
     for row in table_rows:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
@@ -323,9 +307,9 @@ def insert_or_update_tables(
         conn.commit()
 
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
-    logger.info('{} tables inserted into `tables`'.format(len(table_rows)))
+    logger.info("{} tables inserted into `tables`".format(len(table_rows)))
 
     return
 
@@ -355,7 +339,7 @@ def get_tables_from_metadata(
     rows = cursor.fetchall()
 
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
     return rows
 
@@ -373,7 +357,7 @@ def get_columns_from_metadata(
     cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
     rows = cursor.fetchall()
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
     return rows
 
 
@@ -403,7 +387,7 @@ def insert_or_update_uniques(
         cursor.execute(query.format(column_name, schema_name, table_name))
         rows = cursor.fetchone()
         cursor.close()
-        close_db_connection(conn_source)
+        conn_source.close()
         return rows
 
     def insert_into_uniques(
@@ -440,7 +424,7 @@ def insert_or_update_uniques(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def check_if_unique_exists(
@@ -457,7 +441,7 @@ def insert_or_update_uniques(
         cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
         rowcount = cursor.rowcount
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
 
         if rowcount > 0:
             return True
@@ -478,7 +462,7 @@ def insert_or_update_uniques(
         cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     _, server_name, catalog_name, schema_name = _utils.get_connection_parameters(
@@ -487,7 +471,7 @@ def insert_or_update_uniques(
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
 
-    logger.info('{} tables counting unique and null values'.format(len(table_rows)))
+    logger.info("{} tables counting unique and null values".format(len(table_rows)))
 
     for row in table_rows:
         server_name, catalog_name, schema_name, table_name, n_rows = row
@@ -518,7 +502,7 @@ def insert_or_update_uniques(
                 int(count_distinct),
                 int(count_null),
             )
-        logger.info('{} columns inserted into `uniques`'.format(len(column_rows)))
+        logger.info("{} columns inserted into `uniques`".format(len(column_rows)))
 
 
 def insert_or_update_data_values(
@@ -550,7 +534,7 @@ def insert_or_update_data_values(
         )
         rowcount = cursor.rowcount
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
 
         if rowcount > 0:
             return True
@@ -574,7 +558,7 @@ def insert_or_update_data_values(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def get_frequency(db_engine_source, schema_name, table_name, column_name):
@@ -585,7 +569,7 @@ def insert_or_update_data_values(
         cursor.execute(query.format(column_name, schema_name, table_name))
         rows = cursor.fetchall()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def insert_into_data_values(
@@ -618,7 +602,7 @@ def insert_or_update_data_values(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def insert_many_into_data_values(
@@ -637,7 +621,7 @@ def insert_or_update_data_values(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def get_num_distinct_values(
@@ -657,7 +641,7 @@ def insert_or_update_data_values(
         )
         row = cursor.fetchone()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return row[0]
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
@@ -755,7 +739,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
         rows = cursor.fetchall()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def check_if_dates_exists(
@@ -775,7 +759,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         )
         rowcount = cursor.rowcount
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
 
         if rowcount > 0:
             return True
@@ -799,7 +783,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def get_dates(db_engine_source, schema_name, table_name, column_name):
@@ -810,7 +794,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         cursor.execute(query.format(column_name, schema_name, table_name))
         rows = cursor.fetchall()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def insert_many_into_dates(db_engine_metadata: str, data: list):
@@ -826,7 +810,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
@@ -894,7 +878,7 @@ def insert_or_update_stats(
         cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
         rows = cursor.fetchall()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def check_if_stats_exists(
@@ -914,7 +898,7 @@ def insert_or_update_stats(
         )
         rowcount = cursor.rowcount
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
 
         if rowcount > 0:
             return True
@@ -938,7 +922,7 @@ def insert_or_update_stats(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def get_basic_stats(
@@ -955,7 +939,7 @@ def insert_or_update_stats(
         cursor.execute(query.format(column_name, schema_name, table_name))
         rows = cursor.fetchone()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def insert_many_into_stats(db_engine_metadata, data):
@@ -971,7 +955,7 @@ def insert_or_update_stats(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     def get_percentiles(db_engine_source, schema_name, table_name, column_name):
@@ -982,7 +966,7 @@ def insert_or_update_stats(
         cursor.execute(query.format(column_name, schema_name, table_name))
         rows = cursor.fetchone()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return rows
 
     def update_percentiles(db_engine_metadata, data):
@@ -998,7 +982,7 @@ def insert_or_update_stats(
         )
         conn.commit()
         cursor.close()
-        close_db_connection(conn)
+        conn.close()
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
@@ -1106,9 +1090,11 @@ def get_columns(db_engine_source: str):
     cursor.execute(
         query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
     )
-    print(cursor.mogrify(
-        query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
-    ))
+    print(
+        cursor.mogrify(
+            query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
+        )
+    )
     rows = cursor.fetchall()
 
     logger.info(
@@ -1121,7 +1107,7 @@ def get_columns(db_engine_source: str):
     )
 
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
     return rows
 
@@ -1147,6 +1133,6 @@ def explore(db_engine_source: str, level: str):
     )
 
     cursor.close()
-    close_db_connection(conn)
+    conn.close()
 
     return rows
