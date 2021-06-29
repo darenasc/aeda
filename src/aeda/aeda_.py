@@ -3,13 +3,9 @@ import logging
 import typer
 
 from config import (
-    AEDA_DIR,
     EXPLORATION_LEVELS,
-    SQL_CREATE_SCRIPTS,
-    SQL_SCRIPTS,
     SUPPORTED_DB_ENGINES,
 )
-from engines import mysql, sqlite3db, postgres
 import sql as _sql
 import utils as _utils
 
@@ -30,12 +26,8 @@ def create_database(db_engine: str, section: str = None, overwrite: bool = False
     """
     assert db_engine in SUPPORTED_DB_ENGINES, "{} is not supported.".format(db_engine)
 
-    # if db_engine == "sqlite3":
-    #     sqlite3db.create_database(overwrite=overwrite)
-    # elif db_engine == "mysql":
     _sql.create_database(section)
-    # else:
-    #     pass
+
     return
 
 

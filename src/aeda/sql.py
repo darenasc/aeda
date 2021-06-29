@@ -35,7 +35,20 @@ def create_database(section):
         dbname = str(conn_string["schema"] + ".db")
         if not Path(conn_string["folder"]).is_dir():
             Path(conn_string["folder"]).mkdir(parents=True)
+
         conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
+
+        with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
+            sql_script = f.read()
+        sql_scripts = sql_script.split(";")
+
+        cursor = conn.cursor()
+
+        for script in sql_scripts:
+            cursor.execute(script)
+            conn.commit()
+
+        cursor.close()
         conn.close()
 
     logger.info("A {} database created".format(conn_string["db_engine"]))
@@ -117,7 +130,7 @@ def insert_or_update_columns(
     column_rows = get_columns(db_engine_source)
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = _utils.get_db_connection(conn_string)
-    query = SQL_SCRIPTS["insert_columns"][conn_string["db_engine"]]
+    query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
     logger.info(
         "Inserting {} rows into `{}.{}.{}`".format(

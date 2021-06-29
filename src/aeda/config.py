@@ -65,41 +65,53 @@ SQL_SCRIPTS = {
                         AND T.TABLE_CATALOG = %s
                         AND T.TABLE_SCHEMA = %s;""",
     },
-    "insert_columns": {
+    "insert_into_columns": {
         "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
                     values (%s, %s, %s, %s, %s, %s, %s);""",
         "postgres": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
                     values (%s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
+                    values (?, ?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_tables": {
         "mysql": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
                     values (%s, %s, %s, %s, %s, %s);""",
         "postgres": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
                     values (%s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
+                    values (?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_uniques": {
         "mysql": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         "postgres": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        "sqlite3": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     },
     "insert_into_data_values": {
         "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     values (%s, %s, %s, %s, %s, %s, %s);""",
         "postgres": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     values (%s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
+                    values (?, ?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_dates": {
         "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)""",
         "postgres": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        "sqlite3": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
     },
     "insert_into_stats": {
         "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
         "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
     },
     "check_if_column_exists": {
         "mysql": """select * from columns
@@ -114,6 +126,12 @@ SQL_SCRIPTS = {
                 AND TABLE_SCHEMA = %s
                 AND TABLE_NAME = %s
                 AND COLUMN_NAME = %s;""",
+        "sqlite3": """select * from columns
+                WHERE SERVER_NAME = ?
+                AND TABLE_CATALOG = ?
+                AND TABLE_SCHEMA = ?
+                AND TABLE_NAME = ?
+                AND COLUMN_NAME = ?;""",
     },
     "check_if_table_exists": {
         "mysql": """select * from tables
@@ -126,6 +144,11 @@ SQL_SCRIPTS = {
                 AND TABLE_CATALOG = %s
                 AND TABLE_SCHEMA = %s
                 AND TABLE_NAME = %s;""",
+        "sqlite3": """select * from tables
+                WHERE SERVER_NAME = ?
+                AND TABLE_CATALOG = ?
+                AND TABLE_SCHEMA = ?
+                AND TABLE_NAME = ?;""",
     },
     "check_if_unique_exists": {
         "mysql": """select * from uniques
@@ -138,6 +161,11 @@ SQL_SCRIPTS = {
              AND TABLE_CATALOG = %s
              AND TABLE_SCHEMA = %s
              AND TABLE_NAME = %s;""",
+        "sqlite3": """select * from uniques
+            WHERE SERVER_NAME = ?
+             AND TABLE_CATALOG = ?
+             AND TABLE_SCHEMA = ?
+             AND TABLE_NAME = ?;""",
     },
     "check_if_data_value_exists": {
         "mysql": """select * from data_values
@@ -152,6 +180,12 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "sqlite3": """select * from data_values
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "check_if_dates_exists": {
         "mysql": """select * from dates
@@ -166,22 +200,32 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "sqlite3": """select * from dates
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "check_if_stats_exists": {
-        "mysql": """select * 
-                    from stats
+        "mysql": """select * from stats
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
-        "postgres": """select * 
-                    from stats
+        "postgres": """select * from stats
                     WHERE SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "sqlite3": """select * from stats
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "delete_from_columns": {
         "mysql": """delete from columns
@@ -196,6 +240,12 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "sqlite3": """delete from columns
+                WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "delete_from_tables": {
         "mysql": """delete from tables
@@ -208,6 +258,11 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s;""",
+        "sqlite3": """delete from tables
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?;""",
     },
     "delete_from_uniques": {
         "mysql": """delete from uniques
@@ -220,6 +275,11 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s;""",
+        "sqlite3": """delete from uniques
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?;""",
     },
     "delete_from_data_values": {
         "mysql": """delete from data_values
@@ -234,6 +294,12 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "postgres": """delete from data_values
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "delete_from_dates": {
         "mysql": """delete from dates
@@ -248,6 +314,12 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND COLUMN_NAME = %s;""",
+        "sqlite3": """delete from dates
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND COLUMN_NAME = ?;""",
     },
     "delete_from_stats": {
         "mysql": """delete from stats
@@ -262,6 +334,12 @@ SQL_SCRIPTS = {
                      AND TABLE_SCHEMA = %s
                      AND TABLE_NAME = %s
                      AND COLUMN_NAME = %s;""",
+        "sqlite3": """delete from stats
+                    WHERE SERVER_NAME = ?
+                     AND TABLE_CATALOG = ?
+                     AND TABLE_SCHEMA = ?
+                     AND TABLE_NAME = ?
+                     AND COLUMN_NAME = ?;""",
     },
     "tables": {
         "mysql": """select distinct SERVER_NAME 
@@ -280,6 +358,14 @@ SQL_SCRIPTS = {
                     where SERVER_NAME = %s
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s;""",
+        "sqlite3": """select distinct SERVER_NAME 
+                    , TABLE_CATALOG 
+                    , TABLE_SCHEMA 
+                    , TABLE_NAME
+                    from columns
+                    where SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?;""",
     },
     "number_of_columns": {
         "mysql": """SELECT %s AS SERVER_NAME
@@ -328,6 +414,12 @@ SQL_SCRIPTS = {
                     AND TABLE_CATALOG = %s
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s;""",
+        "sqlite3": """UPDATE tables 
+                    SET N_ROWS = ?
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?;""",
     },
     "get_tables": {
         "mysql": """select distinct SERVER_NAME 
@@ -352,6 +444,17 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                         and N_ROWS > {}
                     order by N_ROWS;""",
+        "sqlite3": """select distinct SERVER_NAME 
+                    , TABLE_CATALOG 
+                    , TABLE_SCHEMA 
+                    , TABLE_NAME
+                    , N_ROWS
+                    from tables
+                    where SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                        and N_ROWS > {}
+                    order by N_ROWS;""",
     },
     "get_columns": {
         "mysql": """select column_name
@@ -370,6 +473,14 @@ SQL_SCRIPTS = {
                         AND TABLE_CATALOG = %s
                         AND TABLE_SCHEMA = %s
                         AND TABLE_NAME = %s;""",
+        "sqlite3": """select column_name
+                        , ORDINAL_POSITION
+                        , DATA_TYPE 
+                    from columns
+                    WHERE SERVER_NAME = ?
+                        AND TABLE_CATALOG = ?
+                        AND TABLE_SCHEMA = ?
+                        AND TABLE_NAME = ?;""",
     },
     "get_unique_count": {
         "mysql": """select count(distinct `{0}`) as count_distinct
@@ -394,6 +505,13 @@ SQL_SCRIPTS = {
                         AND TABLE_SCHEMA = %s
                         AND TABLE_NAME = %s
                         AND COLUMN_NAME = %s;""",
+        "sqlite3": """select DISTINCT_VALUES 
+                    from uniques 
+                    where SERVER_NAME = ?
+                        AND TABLE_CATALOG = ?
+                        AND TABLE_SCHEMA = ?
+                        AND TABLE_NAME = ?
+                        AND COLUMN_NAME = ?;""",
     },
     "get_frequency": {
         "mysql": """SELECT `{0}` AS `{0}`
@@ -428,6 +546,17 @@ SQL_SCRIPTS = {
                     AND TABLE_SCHEMA = %s
                     AND TABLE_NAME = %s
                     AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "sqlite3": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                    from columns 
+                    WHERE SERVER_NAME = ?
+                    AND TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
     },
     "get_numeric_columns": {
         "mysql": """select server_name
@@ -451,6 +580,17 @@ SQL_SCRIPTS = {
                          AND TABLE_CATALOG = %s
                          AND TABLE_SCHEMA = %s
                          AND TABLE_NAME = %s
+                         AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');""",
+        "sqlite3": """select server_name
+                            , table_catalog
+                            , table_schema
+                            , table_name
+                            , column_name
+                        from columns 
+                        WHERE SERVER_NAME = ?
+                         AND TABLE_CATALOG = ?
+                         AND TABLE_SCHEMA = ?
+                         AND TABLE_NAME = ?
                          AND lower(DATA_TYPE) IN ('int', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');""",
     },
     "get_first_day_of_month": {
