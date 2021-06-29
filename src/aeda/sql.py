@@ -32,9 +32,11 @@ def create_database(section):
 
         conn.close()
     elif conn_string["db_engine"] == "sqlite3":
-        # sqlite3.connect()
-        print(Path(conn_string['folder']))
-        print(Path(conn_string['schema'] + '.db'))
+        dbname = str(conn_string["schema"] + ".db")
+        if not Path(conn_string["folder"]).is_dir():
+            Path(conn_string["folder"]).mkdir(parents=True)
+        conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
+        conn.close()
 
     logger.info("A {} database created".format(conn_string["db_engine"]))
 
