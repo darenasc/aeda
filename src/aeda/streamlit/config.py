@@ -15,6 +15,7 @@ def get_db_config():
     config.read(DB_CONNECTIONS)
     return config
 
+
 def get_db_connection_string(db_conf: str) -> dict:
     parser = ConfigParser()
     filename = DB_CONNECTIONS
@@ -31,6 +32,7 @@ def get_db_connection_string(db_conf: str) -> dict:
         )
 
     return db
+
 
 def get_connection_parameters(db_conf: str) -> Union[str, str, str, str]:
     connection_string = get_db_connection_string(db_conf)

@@ -9,6 +9,9 @@ python aeda_.py create_db mysql --section mysql-demo
 python aeda_.py explore mysql-demo mysql-metadata
 python aeda_.py explore postgres-demo mysql-metadata
 python aeda_.py explore postgres-demo postgres-metadata
+
+python aeda_.py explore postgres-demo sqlserver-metadata
+python aeda_.py explore mysql-demo sqlserver-metadata
 ```
 
 To run the `aeda`:

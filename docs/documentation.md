@@ -69,11 +69,14 @@ docker exec -i \
 
 # MS SQL Server
 
+Documentation about the docker container available [here](https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker)
 ```
 docker run \
     -e 'ACCEPT_EULA=Y' \
-    -e 'SA_PASSWORD=rootpassword' \
+    -e 'SA_PASSWORD=MyStrongPasswordForSQLServer#2019!' \
     -p 1433:1433 \
+    --name sqlserver \
+    --rm \
     -d \
     mcr.microsoft.com/mssql/server:2019-latest
 ```

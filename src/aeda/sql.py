@@ -248,8 +248,12 @@ def check_if_table_exists(
     query = SQL_SCRIPTS["check_if_table_exists"][conn_string_metadata["db_engine"]]
     conn = _utils.get_db_connection(conn_string_metadata)
     cursor = conn.cursor()
-    cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
-    rowcount = cursor.rowcount
+    if conn_string_metadata["db_engine"] == "mssqlserver":
+        rows = cursor.execute(query, (server_name, catalog_name, schema_name, table_name)).fetchall()
+        rowcount = len(rows)
+    else:
+        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+        rowcount = cursor.rowcount
     cursor.close()
     conn.close()
     return True if rowcount > 0 else False
@@ -316,9 +320,14 @@ def insert_or_update_tables(
         )
         conn.commit()
         num_rows = get_number_of_rows(db_engine_source, schema_name, table_name)
-        cursor.execute(
-            query_update, (num_rows, server_name, catalog_name, schema_name, table_name)
-        )
+        if conn_string_metadata["db_engine"] == 'mssqlserver':
+            cursor.execute(
+                query_update, (num_rows[0], server_name, catalog_name, schema_name, table_name)
+                )
+        else:
+            cursor.execute(
+                query_update, (num_rows, server_name, catalog_name, schema_name, table_name),
+            )
         conn.commit()
 
     cursor.close()
@@ -1086,14 +1095,21 @@ def insert_or_update_stats(
                     float(range_),
                 )
             )
-        logger.info(
-            "Inserting {} records into `stats` for {}.{}".format(
-                len(data), schema_name, table_name
+        if len(data) > 0:
+            logger.info(
+                "Inserting {} records into `stats` for {}.{}".format(
+                    len(data), schema_name, table_name
+                )
             )
-        )
-        insert_many_into_stats(db_engine_metadata, data)
-        if with_percentiles:
-            update_percentiles(db_engine_metadata, percentiles)
+            insert_many_into_stats(db_engine_metadata, data)
+            if with_percentiles:
+                update_percentiles(db_engine_metadata, percentiles)
+        else:
+            logger.info(
+                "{} numeric columns found in {}.{}".format(
+                    len(data), schema_name, table_name
+                )
+            )
 
 
 def get_columns(db_engine_source: str):
@@ -1104,11 +1120,6 @@ def get_columns(db_engine_source: str):
     cursor = conn.cursor()
     cursor.execute(
         query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
-    )
-    print(
-        cursor.mogrify(
-            query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
-        )
     )
     rows = cursor.fetchall()
 

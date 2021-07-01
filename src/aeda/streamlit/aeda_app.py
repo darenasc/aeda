@@ -37,27 +37,27 @@ Schema: `{}`""".format(
 connection_string = _config.get_db_connection_string(add_selectbox)
 conn = _config.get_db_connection(connection_string)
 
-st.subheader('Tables')
+st.subheader("Tables")
 query_tables = """select * from tables;"""
 df_tables = pd.read_sql(query_tables, conn)
 df_tables
 
-st.subheader('Columns')
+st.subheader("Columns")
 query_uniques = """select * from uniques;"""
 df_uniques = pd.read_sql(query_uniques, conn)
 df_uniques
 
-st.subheader('Data Values')
+st.subheader("Data Values")
 query_data_values = """select * from data_values;"""
 df_data_values = pd.read_sql(query_data_values, conn)
 df_data_values
 
-st.subheader('Dates')
+st.subheader("Dates")
 query_dates = """select * from dates;"""
 df_dates = pd.read_sql(query_dates, conn)
 df_dates
 
-st.subheader('Statistics')
+st.subheader("Statistics")
 query_stats = """select * from stats;"""
 df_stats = pd.read_sql(query_stats, conn)
 df_stats

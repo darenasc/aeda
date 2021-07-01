@@ -4,6 +4,7 @@ from typing import Union
 
 import pymysql
 import psycopg2
+import pyodbc
 
 from config import CONFIG_DB, SQL_SCRIPTS
 
@@ -66,6 +67,21 @@ def get_db_connection(conn_string):
                 password=conn_string["password"],
                 database=conn_string["schema"],
                 port=int(conn_string["port"]),
+            )
+        except Exception:
+            logger.error("Database connection error")
+            raise
+    elif conn_string["db_engine"] == "mssqlserver":
+        try:
+            conn = pyodbc.connect(
+                DRIVER = "{ODBC Driver 17 for SQL Server}",
+                server = conn_string["host"],
+                database = conn_string["catalog"],
+                user = conn_string["user"],
+                tds_version = '7.4',
+                # password = conn_string["password"],
+                password = "MyStrongPasswordForSQLServer#2019!",
+                port = conn_string["port"]
             )
         except Exception:
             logger.error("Database connection error")
