@@ -27,6 +27,16 @@ To create the `metadata` database in the container you need to run the following
 docker cp src/aeda/sql_scripts/mysql/mysql.sql mysql-demo:/tmp \
 && docker exec -it mysql-demo sh -c "mysql -prootpassword < /tmp/mysql.sql"
 ```
+# MariaDB database
+
+```
+docker run \
+    -p 127.0.0.1:3306:3306 \
+    --name some-mariadb \
+    -e MARIADB_ROOT_PASSWORD=my-secret-pw \
+    -d \
+    mariadb:10.6
+```
 
 # Postgres database
 
