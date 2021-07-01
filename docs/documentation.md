@@ -56,3 +56,14 @@ docker exec -i \
         --quiet \
         < src/aeda/sql_scripts/postgres/postgres.sql
 ```
+
+# MS SQL Server
+
+```
+docker run \
+    -e 'ACCEPT_EULA=Y' \
+    -e 'SA_PASSWORD=rootpassword' \
+    -p 1433:1433 \
+    -d \
+    mcr.microsoft.com/mssql/server:2019-latest
+```
