@@ -68,3 +68,13 @@ CREATE TABLE IF NOT EXISTS stats (SERVER_NAME VARCHAR(255)
       , P975 FLOAT
       , P99 FLOAT
       , IQR FLOAT);
+
+CREATE VIEW servers AS 
+select      server_name
+            , table_catalog
+            , table_schema
+            , count(distinct table_name) as n_tables
+            , sum(n_columns) as n_columns
+            , sum(n_rows) as n_rows
+from `tables` 
+group by server_name, table_catalog, table_schema;

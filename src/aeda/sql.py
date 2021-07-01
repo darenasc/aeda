@@ -1105,11 +1105,6 @@ def get_columns(db_engine_source: str):
     cursor.execute(
         query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
     )
-    print(
-        cursor.mogrify(
-            query, (conn_string["host"], conn_string["catalog"], conn_string["schema"])
-        )
-    )
     rows = cursor.fetchall()
 
     logger.info(
