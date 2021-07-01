@@ -272,7 +272,7 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
     cursor = conn.cursor()
     cursor.execute(query.format(schema_name, table_name))
 
-    num_rows = cursor.fetchone()
+    num_rows = cursor.fetchone()[0]
 
     cursor.close()
     conn.close()
@@ -320,14 +320,7 @@ def insert_or_update_tables(
         )
         conn.commit()
         num_rows = get_number_of_rows(db_engine_source, schema_name, table_name)
-        if conn_string_metadata["db_engine"] == 'mssqlserver':
-            cursor.execute(
-                query_update, (num_rows[0], server_name, catalog_name, schema_name, table_name)
-                )
-        else:
-            cursor.execute(
-                query_update, (num_rows, server_name, catalog_name, schema_name, table_name),
-            )
+        cursor.execute(query_update, (num_rows, server_name, catalog_name, schema_name, table_name))
         conn.commit()
 
     cursor.close()
@@ -1125,7 +1118,7 @@ def get_columns(db_engine_source: str):
 
     logger.info(
         "{} columns from {}.{}.{}".format(
-            cursor.rowcount,
+            len(rows),
             conn_string["host"],
             conn_string["catalog"],
             conn_string["schema"],

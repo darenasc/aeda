@@ -65,7 +65,22 @@ SQL_SCRIPTS = {
                         AND C.TABLE_NAME = T.TABLE_NAME
                         AND T.TABLE_TYPE = 'BASE TABLE'
                         AND T.TABLE_CATALOG = %s
-                        AND T.TABLE_SCHEMA = %s;"""
+                        AND T.TABLE_SCHEMA = %s;""",
+        "mssqlserver": """SELECT ? AS SERVER_NAME
+                                , C.TABLE_CATALOG
+                                , C.TABLE_SCHEMA
+                                , C.TABLE_NAME
+                                , C.COLUMN_NAME
+                                , C.ORDINAL_POSITION
+                                , C.DATA_TYPE
+                        FROM INFORMATION_SCHEMA.COLUMNS AS C 
+                            INNER JOIN INFORMATION_SCHEMA.TABLES AS T
+                        ON C.TABLE_CATALOG = T.TABLE_CATALOG
+                        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+                        AND C.TABLE_NAME = T.TABLE_NAME
+                        AND T.TABLE_TYPE = 'BASE TABLE'
+                        AND T.TABLE_CATALOG = ?
+                        AND T.TABLE_SCHEMA = ?;"""
     },
     "insert_into_columns": {
         "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
@@ -486,10 +501,25 @@ SQL_SCRIPTS = {
                         , TABLE_SCHEMA
                         , TABLE_NAME
                     ORDER BY 1,2,3,4;""",
+        "mssqlserver": """SELECT ? AS SERVER_NAME
+                    , TABLE_CATALOG
+                    , TABLE_SCHEMA
+                    , TABLE_NAME
+                    , COUNT(*) AS N_COLUMNS
+                    , NULL AS N_ROWS
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_CATALOG = ?
+                    AND TABLE_SCHEMA = ?
+                    AND TABLE_NAME = ?
+                    GROUP BY TABLE_CATALOG
+                        , TABLE_SCHEMA
+                        , TABLE_NAME
+                    ORDER BY 1,2,3,4;""",
     },
     "number_of_rows": {
         "mysql": """select count(*) as n from {}.{}""",
         "postgres": """select count(*) as n from {}.{}""",
+        "mssqlserver": """select count(*) as n from {}.{}""",
     },
     "update_tables": {
         "mysql": """UPDATE tables 
@@ -604,6 +634,9 @@ SQL_SCRIPTS = {
         "postgres": """select count(distinct "{0}") as count_distinct
                             , sum(case when "{0}" is null then 1 else 0 end) as count_null
                     FROM    {1}.{2}""",
+        "mssqlserver": """select count(distinct "{0}") as count_distinct
+                            , sum(case when "{0}" is null then 1 else 0 end) as count_null
+                    FROM    {1}.{2}""",
     },
     "get_distinct_values": {
         "mysql": """select DISTINCT_VALUES 
@@ -641,6 +674,10 @@ SQL_SCRIPTS = {
                     FROM {1}.{2} 
                     GROUP BY `{0}`;""",
         "postgres": """SELECT "{0}" AS "{0}"
+                        , COUNT(*) AS N 
+                    FROM {1}.{2} 
+                    GROUP BY "{0}";""",
+        "mssqlserver": """SELECT "{0}" AS "{0}"
                         , COUNT(*) AS N 
                     FROM {1}.{2} 
                     GROUP BY "{0}";""",
@@ -741,7 +778,11 @@ SQL_SCRIPTS = {
         "mysql": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
                         , count(*) as N
                     from {1}.{2}
-                    group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);"""
+                    group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
+        "mssqlserver": """SELECT DATEFROMPARTS(YEAR({0}), MONTH({0}), 1) as date, count(*) as N 
+                            FROM {1}.{2}
+                            GROUP BY DATEFROMPARTS(YEAR({0}), MONTH({0}), 1)
+                            ORDER BY N DESC;""",
     },
     "get_basic_stats": {
         "mysql": """SELECT   CAST(AVG(`{0}`) as FLOAT) AS AVG_
@@ -755,6 +796,14 @@ SQL_SCRIPTS = {
         "postgres": """SELECT   AVG("{0}") AS AVG_
                                 , stddev("{0}") as STDEV_
                                 , VARIANCE("{0}") as VAR_
+                                , SUM("{0}") as SUM_
+                                , MAX("{0}") AS MAX_
+                                , MIN("{0}") AS MIN_
+                                , MAX("{0}") - MIN("{0}") as RANGE_
+                        FROM {1}.{2};""",
+        "mssqlserver": """SELECT   AVG("{0}") AS AVG_
+                                , STDEV("{0}") as STDEV_
+                                , VAR("{0}") as VAR_
                                 , SUM("{0}") as SUM_
                                 , MAX("{0}") AS MAX_
                                 , MIN("{0}") AS MIN_
@@ -804,6 +853,19 @@ SQL_SCRIPTS = {
                                 , percentile_disc(0.975) within group (order by "{0}") as P975
                                 , percentile_disc(0.99) within group (order by "{0}") as P99
                                 , percentile_disc(0.975) within group (order by "{0}") - percentile_disc(0.25) within group (order by "{0}") as IQR
+                        from {1}.{2}""",
+        "mssqlserver": """select top 1 percentile_disc(0.01) within group (order by "{0}") over (partition by null) as P01
+                                , percentile_disc(0.025) within group (order by "{0}") over (partition by null) as P025
+                                , percentile_disc(0.05) within group (order by "{0}") over (partition by null) as P05
+                                , percentile_disc(0.1) within group (order by "{0}") over (partition by null) as P10
+                                , percentile_disc(0.25) within group (order by "{0}") over (partition by null) as Q1
+                                , percentile_disc(0.5) within group (order by "{0}") over (partition by null) as Q2
+                                , percentile_disc(0.75) within group (order by "{0}") over (partition by null) as Q3
+                                , percentile_disc(0.90) within group (order by "{0}") over (partition by null) as P90
+                                , percentile_disc(0.95) within group (order by "{0}") over (partition by null) as P95
+                                , percentile_disc(0.975) within group (order by "{0}") over (partition by null) as P975
+                                , percentile_disc(0.99) within group (order by "{0}") over (partition by null) as P99
+                                , percentile_disc(0.975) within group (order by "{0}") over (partition by null) - percentile_disc(0.25) within group (order by "{0}") over (partition by null) as IQR
                         from {1}.{2}""",
     },
     "update_percentiles": {

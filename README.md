@@ -12,6 +12,13 @@ python aeda_.py explore postgres-demo postgres-metadata
 
 python aeda_.py explore postgres-demo sqlserver-metadata
 python aeda_.py explore mysql-demo sqlserver-metadata
+python aeda_.py explore mysql-demo sqlserver-metadata
+python aeda_.py explore sqlserver-production sqlserver-metadata
+python aeda_.py explore sqlserver-production mysql-metadata
+python aeda_.py explore sqlserver-production postgres-metadata
+python aeda_.py explore sqlserver-sales sqlserver-metadata
+python aeda_.py explore sqlserver-sales mysql-metadata
+python aeda_.py explore sqlserver-sales postgres-metadata
 ```
 
 To run the `aeda`:
