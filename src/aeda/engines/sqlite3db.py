@@ -1,4 +1,5 @@
 import logging
+from os import close
 import sqlite3
 from pathlib import Path
 
@@ -46,3 +47,17 @@ def get_db_connection():
 def close_db_connection(conn):
     conn.close()
     return
+
+
+conn = sqlite3.connect(
+    "/Users/darenasc/Dropbox/Business Intelligence/Proyectos/aeda/aeda/sqlite3-dbs/metadata.db"
+)
+cursor = conn.cursor()
+cursor.execute(
+    "select * from dates WHERE SERVER_NAME = 'localhost' AND TABLE_CATALOG = 'BikeStores' AND TABLE_SCHEMA = 'sales' AND TABLE_NAME = 'orders' AND COLUMN_NAME = 'order_date';"
+)
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+cursor.close()
+conn.close()

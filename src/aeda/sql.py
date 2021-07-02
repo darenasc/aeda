@@ -98,7 +98,8 @@ def check_if_record_exists(
     cursor.execute(
         query, (server_name, table_catalog, table_schema, table_name, column_name)
     )
-    rowcount = cursor.rowcount
+    rows = cursor.fetchall()
+    rowcount = len(rows)
     cursor.close()
     conn.close()
 
@@ -269,14 +270,9 @@ def check_if_table_exists(
     query = SQL_SCRIPTS["check_if_table_exists"][conn_string_metadata["db_engine"]]
     conn = _utils.get_db_connection(conn_string_metadata)
     cursor = conn.cursor()
-    if conn_string_metadata["db_engine"] in ["mssqlserver", "sqlite3"]:
-        rows = cursor.execute(
-            query, (server_name, catalog_name, schema_name, table_name)
-        ).fetchall()
-        rowcount = len(rows)
-    else:
-        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
-        rowcount = cursor.rowcount
+    cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+    rows = cursor.fetchall()
+    rowcount = len(rows)
     cursor.close()
     conn.close()
     return True if rowcount > 0 else False
@@ -807,7 +803,8 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         cursor.execute(
             query, (server_name, catalog_name, schema_name, table_name, column_name)
         )
-        rowcount = cursor.rowcount
+        rows = cursor.fetchall()
+        rowcount = len(rows)
         cursor.close()
         conn.close()
 
@@ -943,9 +940,10 @@ def insert_or_update_stats(
         query = SQL_SCRIPTS["check_if_stats_exists"][conn_string["db_engine"]]
         conn = _utils.get_db_connection(conn_string)
         cursor = conn.cursor()
-        rows = cursor.execute(
+        cursor.execute(
             query, (server_name, catalog_name, schema_name, table_name, column_name)
-        ).fetchall()
+        )
+        rows = cursor.fetchall()
         rowcount = len(rows)
         cursor.close()
         conn.close()
