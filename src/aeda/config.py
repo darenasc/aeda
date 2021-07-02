@@ -37,138 +37,52 @@ DATA_TYPES = {
 
 SQL_SCRIPTS = {
     "columns": {
-        "mysql": """SELECT %s AS SERVER_NAME
-                            , C.TABLE_CATALOG
-                            , C.TABLE_SCHEMA
-                            , C.TABLE_NAME
-                            , C.COLUMN_NAME
-                            , C.ORDINAL_POSITION
-                            , C.DATA_TYPE
-                    FROM INFORMATION_SCHEMA.COLUMNS AS C 
-                        INNER JOIN INFORMATION_SCHEMA.TABLES AS T
-                    ON C.TABLE_CATALOG = T.TABLE_CATALOG
-                    AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-                    AND C.TABLE_NAME = T.TABLE_NAME
-                    AND T.TABLE_TYPE = 'BASE TABLE'
-                    AND T.TABLE_CATALOG = %s
-                    AND T.TABLE_SCHEMA = %s;""",
-        "postgres": """SELECT %s AS SERVER_NAME
-                                , C.TABLE_CATALOG
-                                , C.TABLE_SCHEMA
-                                , C.TABLE_NAME
-                                , C.COLUMN_NAME
-                                , C.ORDINAL_POSITION
-                                , C.DATA_TYPE
-                        FROM INFORMATION_SCHEMA.COLUMNS AS C 
-                            INNER JOIN INFORMATION_SCHEMA.TABLES AS T
-                        ON C.TABLE_CATALOG = T.TABLE_CATALOG
-                        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-                        AND C.TABLE_NAME = T.TABLE_NAME
-                        AND T.TABLE_TYPE = 'BASE TABLE'
-                        AND T.TABLE_CATALOG = %s
-                        AND T.TABLE_SCHEMA = %s;""",
-        "mssqlserver": """SELECT ? AS SERVER_NAME
-                                , C.TABLE_CATALOG
-                                , C.TABLE_SCHEMA
-                                , C.TABLE_NAME
-                                , C.COLUMN_NAME
-                                , C.ORDINAL_POSITION
-                                , C.DATA_TYPE
-                        FROM INFORMATION_SCHEMA.COLUMNS AS C 
-                            INNER JOIN INFORMATION_SCHEMA.TABLES AS T
-                        ON C.TABLE_CATALOG = T.TABLE_CATALOG
-                        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-                        AND C.TABLE_NAME = T.TABLE_NAME
-                        AND T.TABLE_TYPE = 'BASE TABLE'
-                        AND T.TABLE_CATALOG = ?
-                        AND T.TABLE_SCHEMA = ?;""",
-        "mariadb": """SELECT ? AS SERVER_NAME
-                                , C.TABLE_CATALOG
-                                , C.TABLE_SCHEMA
-                                , C.TABLE_NAME
-                                , C.COLUMN_NAME
-                                , C.ORDINAL_POSITION
-                                , C.DATA_TYPE
-                        FROM INFORMATION_SCHEMA.COLUMNS AS C 
-                            INNER JOIN INFORMATION_SCHEMA.TABLES AS T
-                        ON C.TABLE_CATALOG = T.TABLE_CATALOG
-                        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-                        AND C.TABLE_NAME = T.TABLE_NAME
-                        AND T.TABLE_TYPE = 'BASE TABLE'
-                        AND T.TABLE_CATALOG = ?
-                        AND T.TABLE_SCHEMA = ?;""",
+        "mysql": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS AS C   INNER JOIN INFORMATION_SCHEMA.TABLES AS T  ON C.TABLE_CATALOG = T.TABLE_CATALOG  AND C.TABLE_SCHEMA = T.TABLE_SCHEMA  AND C.TABLE_NAME = T.TABLE_NAME  AND T.TABLE_TYPE = 'BASE TABLE'  AND T.TABLE_CATALOG = %s  AND T.TABLE_SCHEMA = %s;""",
+        "postgres": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C  INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
+        "mssqlserver": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C  INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
+        "mariadb": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C  INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
     },
     "insert_into_columns": {
-        "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (%s, %s, %s, %s, %s, %s, %s);""",
-        "postgres": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (%s, %s, %s, %s, %s, %s, %s);""",
-        "sqlite3": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
-        "mssqlserver": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
-        "mariadb": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
+        "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (%s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (%s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (?, ?, ?, ?, ?, ?, ?);""",
+        "mssqlserver": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (?, ?, ?, ?, ?, ?, ?);""",
+        "mariadb": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (?, ?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_tables": {
-        "mysql": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (%s, %s, %s, %s, %s, %s);""",
-        "postgres": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (%s, %s, %s, %s, %s, %s);""",
-        "sqlite3": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (?, ?, ?, ?, ?, ?);""",
-        "mssqlserver": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (?, ?, ?, ?, ?, ?);""",
-        "mariadb": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS)
-                    values (?, ?, ?, ?, ?, ?);""",
+        "mysql": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS) values (%s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS) values (%s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS) values (?, ?, ?, ?, ?, ?);""",
+        "mssqlserver": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS) values (?, ?, ?, ?, ?, ?);""",
+        "mariadb": """insert into tables (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, N_COLUMNS, N_ROWS) values (?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_uniques": {
-        "mysql": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-        "postgres": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-        "sqlite3": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        "mssqlserver": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        "mariadb": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        "mysql": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        "postgres": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        "sqlite3": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        "mssqlserver": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        "mariadb": """insert into uniques (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, DISTINCT_VALUES, NULL_VALUES) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     },
     "insert_into_data_values": {
-        "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (%s, %s, %s, %s, %s, %s, %s);""",
-        "postgres": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (%s, %s, %s, %s, %s, %s, %s);""",
-        "sqlite3": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
-        "mssqlserver": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
-        "mariadb": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    values (?, ?, ?, ?, ?, ?, ?);""",
+        "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (%s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (%s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
+        "mssqlserver": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
+        "mariadb": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
     },
     "insert_into_dates": {
-        "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-        "postgres": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-        "sqlite3": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        "mssqlserver": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        "mariadb": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        "mysql": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        "postgres": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        "sqlite3": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        "mssqlserver": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        "mariadb": """INSERT INTO dates (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?)""",
     },
     "insert_into_stats": {
-        "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
-        "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
-                    values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
-        "sqlite3": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
-        "mssqlserver": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE")
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
-        "mariadb": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
+        "mysql": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+        "postgres": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE") values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+        "sqlite3": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
+        "mssqlserver": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, "RANGE") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
+        "mariadb": """insert into stats (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, AVG, STDEV, VAR, SUM, MAX, MIN, `RANGE`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""",
     },
     "check_if_column_exists": {
         "mysql": """select * from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
@@ -295,18 +209,10 @@ SQL_SCRIPTS = {
         "mariadb": """select column_name , ORDINAL_POSITION , DATA_TYPE  from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?;""",
     },
     "get_unique_count": {
-        "mysql": """select count(distinct `{0}`) as count_distinct
-                            , sum(case when `{0}` is null then 1 else 0 end) as count_null
-                    FROM    {1}.{2}""",
-        "postgres": """select count(distinct "{0}") as count_distinct
-                            , sum(case when "{0}" is null then 1 else 0 end) as count_null
-                    FROM    {1}.{2}""",
-        "mssqlserver": """select count(distinct "{0}") as count_distinct
-                            , sum(case when "{0}" is null then 1 else 0 end) as count_null
-                    FROM    {1}.{2}""",
-        "mariadb": """select count(distinct "{0}") as count_distinct
-                            , sum(case when "{0}" is null then 1 else 0 end) as count_null
-                    FROM    {1}.{2}""",
+        "mysql": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM    {1}.{2}""",
+        "postgres": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM    {1}.{2}""",
+        "mssqlserver": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM    {1}.{2}""",
+        "mariadb": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM    {1}.{2}""",
     },
     "get_distinct_values": {
         "mysql": """select DISTINCT_VALUES  from uniques  where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
@@ -316,79 +222,17 @@ SQL_SCRIPTS = {
         "mariadb": """select DISTINCT_VALUES  from uniques  where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
     },
     "get_frequency": {
-        "mysql": """SELECT `{0}` AS `{0}`
-                        , COUNT(*) AS N 
-                    FROM {1}.{2} 
-                    GROUP BY `{0}`;""",
-        "postgres": """SELECT "{0}" AS "{0}"
-                        , COUNT(*) AS N 
-                    FROM {1}.{2} 
-                    GROUP BY "{0}";""",
-        "mssqlserver": """SELECT "{0}" AS "{0}"
-                        , COUNT(*) AS N 
-                    FROM {1}.{2} 
-                    GROUP BY "{0}";""",
-        "mariadb": """SELECT "{0}" AS "{0}"
-                        , COUNT(*) AS N 
-                    FROM {1}.{2} 
-                    GROUP BY "{0}";""",
+        "mysql": """SELECT `{0}` AS `{0}` , COUNT(*) AS N  FROM {1}.{2}  GROUP BY `{0}`;""",
+        "postgres": """SELECT "{0}" AS "{0}" , COUNT(*) AS N  FROM {1}.{2}  GROUP BY "{0}";""",
+        "mssqlserver": """SELECT "{0}" AS "{0}" , COUNT(*) AS N  FROM {1}.{2}  GROUP BY "{0}";""",
+        "mariadb": """SELECT "{0}" AS "{0}" , COUNT(*) AS N  FROM {1}.{2}  GROUP BY "{0}";""",
     },
     "get_date_columns": {
-        "mysql": """select server_name
-                            , table_catalog
-                            , table_schema
-                            , table_name
-                            , column_name
-                    from columns 
-                    WHERE SERVER_NAME = %s
-                    AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
-        "postgres": """select server_name
-                            , table_catalog
-                            , table_schema
-                            , table_name
-                            , column_name
-                    from columns 
-                    WHERE SERVER_NAME = %s
-                    AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
-        "sqlite3": """select server_name
-                            , table_catalog
-                            , table_schema
-                            , table_name
-                            , column_name
-                    from columns 
-                    WHERE SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
-        "mssqlserver": """select server_name
-                            , table_catalog
-                            , table_schema
-                            , table_name
-                            , column_name
-                    from columns 
-                    WHERE SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
-        "mariadb": """select server_name
-                            , table_catalog
-                            , table_schema
-                            , table_name
-                            , column_name
-                    from columns 
-                    WHERE SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "mysql": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "postgres": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "sqlite3": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "mssqlserver": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
+        "mariadb": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) IN ('datetime', 'timestamp', 'date', 'datetime2', 'smalldatetime');""",
     },
     "get_numeric_columns": {
         "mysql": """select server_name , table_catalog , table_schema , table_name , column_name from columns  WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) IN ('int', 'integer', 'decimal', 'numeric', 'float', 'money', 'tinyint', 'bigint', 'smallint', 'real');""",
@@ -513,90 +357,10 @@ SQL_SCRIPTS = {
                         from {1}.{2}""",
     },
     "update_percentiles": {
-        "mysql": """update stats set P01 = %s
-                    , P025 = %s
-                    , P05 = %s
-                    , P10 = %s
-                    , Q1  = %s
-                    , Q2  = %s 
-                    , Q3  = %s
-                    , P90  = %s
-                    , P95  = %s
-                    , P975 = %s
-                    , P99  = %s
-                    , IQR  = %s
-                    where SERVER_NAME = %s
-                    AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;""",
-        "postgres": """update stats set P01 = %s
-                    , P025 = %s
-                    , P05 = %s
-                    , P10 = %s
-                    , Q1  = %s
-                    , Q2  = %s 
-                    , Q3  = %s
-                    , P90  = %s
-                    , P95  = %s
-                    , P975 = %s
-                    , P99  = %s
-                    , IQR  = %s
-                    where SERVER_NAME = %s
-                    AND TABLE_CATALOG = %s
-                    AND TABLE_SCHEMA = %s
-                    AND TABLE_NAME = %s
-                    AND COLUMN_NAME = %s;""",
-        "sqlite3": """update stats set P01 = ?
-                    , P025 = ?
-                    , P05 = ?
-                    , P10 = ?
-                    , Q1  = ?
-                    , Q2  = ? 
-                    , Q3  = ?
-                    , P90  = ?
-                    , P95  = ?
-                    , P975 = ?
-                    , P99  = ?
-                    , IQR  = ?
-                    where SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND COLUMN_NAME = ?;""",
-        "mssqlserver": """update stats set P01 = ?
-                    , P025 = ?
-                    , P05 = ?
-                    , P10 = ?
-                    , Q1  = ?
-                    , Q2  = ? 
-                    , Q3  = ?
-                    , P90  = ?
-                    , P95  = ?
-                    , P975 = ?
-                    , P99  = ?
-                    , IQR  = ?
-                    where SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND COLUMN_NAME = ?;""",
-        "mariadb": """update stats set P01 = ?
-                    , P025 = ?
-                    , P05 = ?
-                    , P10 = ?
-                    , Q1  = ?
-                    , Q2  = ? 
-                    , Q3  = ?
-                    , P90  = ?
-                    , P95  = ?
-                    , P975 = ?
-                    , P99  = ?
-                    , IQR  = ?
-                    where SERVER_NAME = ?
-                    AND TABLE_CATALOG = ?
-                    AND TABLE_SCHEMA = ?
-                    AND TABLE_NAME = ?
-                    AND COLUMN_NAME = ?;""",
+        "mysql": """update stats set P01 = %s , P025 = %s , P05 = %s , P10 = %s , Q1  = %s , Q2  = %s  , Q3  = %s , P90  = %s , P95  = %s , P975 = %s , P99  = %s , IQR  = %s where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
+        "postgres": """update stats set P01 = %s , P025 = %s , P05 = %s , P10 = %s , Q1  = %s , Q2  = %s  , Q3  = %s , P90  = %s , P95  = %s , P975 = %s , P99  = %s , IQR  = %s where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
+        "sqlite3": """update stats set P01 = ? , P025 = ? , P05 = ? , P10 = ? , Q1  = ? , Q2  = ?  , Q3  = ? , P90  = ? , P95  = ? , P975 = ? , P99  = ? , IQR  = ? where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
+        "mssqlserver": """update stats set P01 = ? , P025 = ? , P05 = ? , P10 = ? , Q1  = ? , Q2  = ?  , Q3  = ? , P90  = ? , P95  = ? , P975 = ? , P99  = ? , IQR  = ? where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
+        "mariadb": """update stats set P01 = ? , P025 = ? , P05 = ? , P10 = ? , Q1  = ? , Q2  = ?  , Q3  = ? , P90  = ? , P95  = ? , P975 = ? , P99  = ? , IQR  = ? where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
     },
 }
