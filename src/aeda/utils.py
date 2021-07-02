@@ -80,8 +80,7 @@ def get_db_connection(conn_string):
                 database=conn_string["catalog"],
                 user=conn_string["user"],
                 tds_version="7.4",
-                password = conn_string["password"],
-                # password="MyStrongPasswordForSQLServer#2019!",
+                password=conn_string["password"],
                 port=conn_string["port"],
             )
         except Exception:

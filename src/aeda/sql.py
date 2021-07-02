@@ -50,6 +50,19 @@ def create_database(section):
 
         cursor.close()
         conn.close()
+    elif conn_string["db_engine"] == "mssqlserver":
+        with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
+            sql_script = f.read()
+        sql_scripts = sql_script.split(";")
+
+        cursor = conn.cursor()
+
+        for script in sql_scripts:
+            cursor.execute(script)
+            conn.commit()
+
+        cursor.close()
+        conn.close()
 
     logger.info("A {} database created".format(conn_string["db_engine"]))
 
