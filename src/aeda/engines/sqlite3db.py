@@ -2,7 +2,9 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from config import SQL_CREATE_SCRIPTS, SQLITE3_DB_DIR
+from pymysql import cursors
+
+# from config import SQL_CREATE_SCRIPTS, SQLITE3_DB_DIR
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)

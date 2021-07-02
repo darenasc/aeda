@@ -12,7 +12,12 @@ logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
-def create_database(section):
+def create_database(section: str):
+    """Creates the metadata database based on the database engine.
+
+    Parameters:
+        section (str): Section of the .ini file with the database configuration with connection parameters file.
+    """
     conn_string = _utils.get_db_connection_string(section)
     conn = _utils.get_db_connection(conn_string)
 
@@ -38,19 +43,6 @@ def create_database(section):
 
         conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
 
-        with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
-            sql_script = f.read()
-        sql_scripts = sql_script.split(";")
-
-        cursor = conn.cursor()
-
-        for script in sql_scripts:
-            cursor.execute(script)
-            conn.commit()
-
-        cursor.close()
-        conn.close()
-    elif conn_string["db_engine"] == "mssqlserver":
         with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
             sql_script = f.read()
         sql_scripts = sql_script.split(";")
@@ -145,14 +137,22 @@ def insert_or_update_columns(
     conn = _utils.get_db_connection(conn_string)
     query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
-    logger.info(
-        "Inserting {} rows into `{}.{}.{}`".format(
-            len(column_rows),
-            conn_string["host"],
-            conn_string["catalog"],
-            conn_string["schema"],
+    if conn_string["db_engine"] == "sqlite3":
+        logger.info(
+            "Inserting {} rows into `{}.db`".format(
+                len(column_rows),
+                conn_string["schema"],
+            )
         )
-    )
+    else:
+        logger.info(
+            "Inserting {} rows into `{}.{}.{}`".format(
+                len(column_rows),
+                conn_string["host"],
+                conn_string["catalog"],
+                conn_string["schema"],
+            )
+        )
     for row in column_rows:
         (
             server_name,
@@ -194,14 +194,22 @@ def insert_or_update_columns(
             )
             conn.commit()
     cursor.close()
-    logger.info(
-        "{} rows inserted into `{}.{}.{}`".format(
-            len(column_rows),
-            conn_string["host"],
-            conn_string["catalog"],
-            conn_string["schema"],
+    if conn_string["db_engine"] == "sqlite3":
+        logger.info(
+            "{} rows inserted into `{}.db`".format(
+                len(column_rows),
+                conn_string["schema"],
+            )
         )
-    )
+    else:
+        logger.info(
+            "{} rows inserted into `{}.{}.{}`".format(
+                len(column_rows),
+                conn_string["host"],
+                conn_string["catalog"],
+                conn_string["schema"],
+            )
+        )
     return
 
 
@@ -261,7 +269,7 @@ def check_if_table_exists(
     query = SQL_SCRIPTS["check_if_table_exists"][conn_string_metadata["db_engine"]]
     conn = _utils.get_db_connection(conn_string_metadata)
     cursor = conn.cursor()
-    if conn_string_metadata["db_engine"] == "mssqlserver":
+    if conn_string_metadata["db_engine"] in ["mssqlserver", "sqlite3"]:
         rows = cursor.execute(
             query, (server_name, catalog_name, schema_name, table_name)
         ).fetchall()
@@ -473,7 +481,8 @@ def insert_or_update_uniques(
         conn = _utils.get_db_connection(conn_string)
         cursor = conn.cursor()
         cursor.execute(query, (server_name, table_catalog, table_schema, table_name))
-        rowcount = cursor.rowcount
+        rows = cursor.fetchall()
+        rowcount = len(rows)
         cursor.close()
         conn.close()
 
@@ -566,7 +575,8 @@ def insert_or_update_data_values(
         cursor.execute(
             query, (server_name, table_catalog, table_schema, table_name, column_name)
         )
-        rowcount = cursor.rowcount
+        rows = cursor.fetchall()
+        rowcount = len(rows)
         cursor.close()
         conn.close()
 
@@ -649,10 +659,16 @@ def insert_or_update_data_values(
         ]
         conn = _utils.get_db_connection(conn_string_metadata)
         cursor = conn.cursor()
-        cursor.executemany(
-            query_insert,
-            (list(data_value_rows)),
-        )
+        if conn_string_metadata["db_engine"] == "sqlite3":
+            cursor.executemany(
+                query_insert,
+                list(data_value_rows),
+            )
+        else:
+            cursor.executemany(
+                query_insert,
+                (list(data_value_rows)),
+            )
         conn.commit()
         cursor.close()
         conn.close()
@@ -732,8 +748,8 @@ def insert_or_update_data_values(
                         schema_name,
                         table_name,
                         column_name,
-                        value,
-                        num_rows,
+                        str(value),
+                        int(num_rows),
                     )
                 )
             logger.info(
@@ -927,10 +943,10 @@ def insert_or_update_stats(
         query = SQL_SCRIPTS["check_if_stats_exists"][conn_string["db_engine"]]
         conn = _utils.get_db_connection(conn_string)
         cursor = conn.cursor()
-        cursor.execute(
+        rows = cursor.execute(
             query, (server_name, catalog_name, schema_name, table_name, column_name)
-        )
-        rowcount = cursor.rowcount
+        ).fetchall()
+        rowcount = len(rows)
         cursor.close()
         conn.close()
 

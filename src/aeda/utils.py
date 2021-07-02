@@ -1,11 +1,13 @@
 from configparser import ConfigParser
 import logging
+from pathlib import Path
 from typing import Union
 
 import mariadb
 import pymysql
 import psycopg2
 import pyodbc
+import sqlite3
 
 from config import CONFIG_DB, SQL_SCRIPTS
 
@@ -95,6 +97,13 @@ def get_db_connection(conn_string):
                 port=int(conn_string["port"]),
                 database=conn_string["schema"],
             )
+        except:
+            logger.error("Database connection error")
+            raise
+    elif conn_string["db_engine"] == "sqlite3":
+        try:
+            dbname = str(conn_string["schema"] + ".db")
+            conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
         except:
             logger.error("Database connection error")
             raise
