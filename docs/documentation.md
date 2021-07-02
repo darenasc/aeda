@@ -31,10 +31,14 @@ docker cp src/aeda/sql_scripts/mysql/mysql.sql mysql-demo:/tmp \
 
 ```
 docker run \
-    -p 127.0.0.1:3306:3306 \
-    --name some-mariadb \
-    -e MARIADB_ROOT_PASSWORD=my-secret-pw \
+    -p 6605:3306 \
+    --name mariadb \
+    -e MARIADB_ROOT_PASSWORD=rootpassword \
+    -e MARIADB_DATABASE=world \
+    -e MARIADB_USER=demo \
+    -e MARIADB_PASSWORD=demo \
     -d \
+    --rm \
     mariadb:10.6
 ```
 
@@ -82,25 +86,7 @@ docker run \
 
 docker exec -it sqlserver mkdir /var/opt/mssql/backup
 
-
-docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost \
-   -U SA -P 'MyStrongPasswordForSQLServer#2019!' \
-   -Q 'RESTORE FILELISTONLY FROM DISK = "/var/opt/mssql/backup/wwi.bak"' \
-   | tr -s ' ' | cut -d ' ' -f 1-2
-
-sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd \
-   -S localhost -U SA -P 'MyStrongPasswordForSQLServer#2019!' \
-   -Q 'RESTORE DATABASE WideWorldImporters FROM DISK = "/var/opt/mssql/backup/wwi.bak" WITH MOVE "WWI_Primary" TO "/var/opt/mssql/data/WideWorldImporters.mdf", MOVE "WWI_UserData" TO "/var/opt/mssql/data/WideWorldImporters_userdata.ndf", MOVE "WWI_Log" TO "/var/opt/mssql/data/WideWorldImporters.ldf", MOVE "WWI_InMemory_Data_1" TO "/var/opt/mssql/data/WideWorldImporters_InMemory_Data_1"'
-
-docker cp src/aeda/sql_scripts/mssqlserver/Corrupt2008DemoFatalCorruption1.bak sqlserver:/var/opt/mssql/backup
-docker cp src/aeda/sql_scripts/mssqlserver/Corrupt2008DemoFatalCorruption2.bak sqlserver:/var/opt/mssql/backup
-
-docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost \
-   -U SA -P 'MyStrongPasswordForSQLServer#2019!' \
-   -Q 'RESTORE FILELISTONLY FROM DISK = "/var/opt/mssql/backup/Corrupt2008DemoFatalCorruption1.bak"' \
-   | tr -s ' ' | cut -d ' ' -f 1-2
-
-sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd \
-   -S localhost -U SA -P 'MyStrongPasswordForSQLServer#2019!' \
-   -Q 'RESTORE DATABASE WideWorldImporters FROM DISK = "/var/opt/mssql/backup/wwi.bak" WITH MOVE "WWI_Primary" TO "/var/opt/mssql/data/WideWorldImporters.mdf", MOVE "WWI_UserData" TO "/var/opt/mssql/data/WideWorldImporters_userdata.ndf", MOVE "WWI_Log" TO "/var/opt/mssql/data/WideWorldImporters.ldf", MOVE "WWI_InMemory_Data_1" TO "/var/opt/mssql/data/WideWorldImporters_InMemory_Data_1"'
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - create objects.sql sqlserver:/var/opt/mssql/backup
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - drop all objects.sql sqlserver:/var/opt/mssql/backup
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - load data.sql sqlserver:/var/opt/mssql/backup
 ```

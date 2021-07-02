@@ -249,7 +249,9 @@ def check_if_table_exists(
     conn = _utils.get_db_connection(conn_string_metadata)
     cursor = conn.cursor()
     if conn_string_metadata["db_engine"] == "mssqlserver":
-        rows = cursor.execute(query, (server_name, catalog_name, schema_name, table_name)).fetchall()
+        rows = cursor.execute(
+            query, (server_name, catalog_name, schema_name, table_name)
+        ).fetchall()
         rowcount = len(rows)
     else:
         cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
@@ -320,7 +322,9 @@ def insert_or_update_tables(
         )
         conn.commit()
         num_rows = get_number_of_rows(db_engine_source, schema_name, table_name)
-        cursor.execute(query_update, (num_rows, server_name, catalog_name, schema_name, table_name))
+        cursor.execute(
+            query_update, (num_rows, server_name, catalog_name, schema_name, table_name)
+        )
         conn.commit()
 
     cursor.close()
@@ -948,7 +952,6 @@ def insert_or_update_stats(
         """
         Returns avg, stdev, var, sum, max, min, range
         """
-        # .format(column_name, table_catalog, table_schema, table_name)
         conn_string = _utils.get_db_connection_string(db_engine_source)
         query = SQL_SCRIPTS["get_basic_stats"][conn_string["db_engine"]]
         conn = _utils.get_db_connection(conn_string)
@@ -1052,18 +1055,18 @@ def insert_or_update_stats(
                 ) = percentile_rows
                 percentiles.append(
                     (
-                        p01,
-                        p025,
-                        p05,
-                        p10,
-                        q2,
-                        q3,
-                        q4,
-                        p90,
-                        p95,
-                        p975,
-                        p99,
-                        iqr,
+                        float(p01),
+                        float(p025),
+                        float(p05),
+                        float(p10),
+                        float(q2),
+                        float(q3),
+                        float(q4),
+                        float(p90),
+                        float(p95),
+                        float(p975),
+                        float(p99),
+                        float(iqr),
                         server_name,
                         catalog_name,
                         schema_name,

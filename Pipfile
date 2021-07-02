@@ -18,6 +18,7 @@ streamlit = "*"
 typer = "*"
 tqdm = "*"
 termcolor = "*"
+mariadb = "*"
 
 [requires]
 python_version = "3.8"

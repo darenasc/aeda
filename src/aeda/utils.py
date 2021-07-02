@@ -2,6 +2,7 @@ from configparser import ConfigParser
 import logging
 from typing import Union
 
+import mariadb
 import pymysql
 import psycopg2
 import pyodbc
@@ -59,7 +60,7 @@ def get_db_connection(conn_string):
         except Exception:
             logger.error("Database connection error")
             raise
-    elif conn_string["db_engine"] == "mysql":
+    elif conn_string["db_engine"] in ["mysql"]:
         try:
             conn = pymysql.connect(
                 host=conn_string["host"],
@@ -74,16 +75,28 @@ def get_db_connection(conn_string):
     elif conn_string["db_engine"] == "mssqlserver":
         try:
             conn = pyodbc.connect(
-                DRIVER = "{ODBC Driver 17 for SQL Server}",
-                server = conn_string["host"],
-                database = conn_string["catalog"],
-                user = conn_string["user"],
-                tds_version = '7.4',
+                DRIVER="{ODBC Driver 17 for SQL Server}",
+                server=conn_string["host"],
+                database=conn_string["catalog"],
+                user=conn_string["user"],
+                tds_version="7.4",
                 # password = conn_string["password"],
-                password = "MyStrongPasswordForSQLServer#2019!",
-                port = conn_string["port"]
+                password="MyStrongPasswordForSQLServer#2019!",
+                port=conn_string["port"],
             )
         except Exception:
+            logger.error("Database connection error")
+            raise
+    elif conn_string["db_engine"] == "mariadb":
+        try:
+            conn = mariadb.connect(
+                user=conn_string["user"],
+                password=conn_string["password"],
+                host=conn_string["host"],
+                port=int(conn_string["port"]),
+                database=conn_string["schema"],
+            )
+        except:
             logger.error("Database connection error")
             raise
     return conn

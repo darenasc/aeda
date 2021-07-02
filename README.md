@@ -19,6 +19,10 @@ python aeda_.py explore sqlserver-production postgres-metadata
 python aeda_.py explore sqlserver-sales sqlserver-metadata
 python aeda_.py explore sqlserver-sales mysql-metadata
 python aeda_.py explore sqlserver-sales postgres-metadata
+
+python aeda_.py explore mariadb-world sqlserver-metadata
+python aeda_.py explore sqlserver-production mariadb-metadata
+python aeda_.py explore sqlserver-sales mariadb-metadata
 ```
 
 To run the `aeda`:
