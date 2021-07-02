@@ -7,6 +7,12 @@ Link   : http://www.sqlservertutorial.net/load-sample-database/
 Version: 1.0
 --------------------------------------------------------------------
 */
+CREATE DATABASE BikeStores;
+GO
+
+USE BikeStores;
+GO
+
 -- create schemas
 CREATE SCHEMA production;
 go

@@ -1,7 +1,7 @@
 CREATE DATABASE metadata;
-
+GO
 USE metadata;
-
+GO
 CREATE TABLE columns (SERVER_NAME NVARCHAR(255)
       , TABLE_CATALOG NVARCHAR(255)
       , TABLE_SCHEMA NVARCHAR(255)
@@ -52,11 +52,11 @@ CREATE TABLE stats (SERVER_NAME NVARCHAR(255)
       , COLUMN_NAME NVARCHAR(255)
       , AVG FLOAT
       , STDEV FLOAT
-      , VAR FLOAT
+      , [VAR] FLOAT
       , SUM FLOAT
       , MAX FLOAT
       , MIN FLOAT
-      , "RANGE" FLOAT
+      , [RANGE] FLOAT
       , P01 FLOAT
       , P025 FLOAT
       , P05 FLOAT
@@ -69,7 +69,15 @@ CREATE TABLE stats (SERVER_NAME NVARCHAR(255)
       , P975 FLOAT
       , P99 FLOAT
       , IQR FLOAT);
+GO
 
-CREATE VIEW servers AS select server_name, table_catalog , table_schema , count(distinct table_name) as n_tables, sum(n_columns) as n_columns , sum(n_rows) as n_rows 
-from "tables"
+CREATE VIEW servers AS 
+select      server_name
+            , table_catalog 
+            , table_schema 
+            , count(distinct table_name) as n_tables
+            , sum(n_columns) as n_columns 
+            , sum(n_rows) as n_rows 
+from tables
 group by server_name, table_catalog , table_schema;
+GO

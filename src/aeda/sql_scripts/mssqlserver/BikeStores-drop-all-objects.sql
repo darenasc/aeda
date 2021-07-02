@@ -8,6 +8,9 @@ Version: 1.0
 --------------------------------------------------------------------
 */
 
+USE BikeStores;
+GO
+
 -- drop tables
 DROP TABLE IF EXISTS sales.order_items;
 DROP TABLE IF EXISTS sales.orders;
@@ -23,3 +26,5 @@ DROP TABLE IF EXISTS sales.stores;
 
 DROP SCHEMA IF EXISTS sales;
 DROP SCHEMA IF EXISTS production;
+
+DROP DATABASE IF EXISTS BikeStores;

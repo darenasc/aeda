@@ -75,18 +75,27 @@ docker exec -i \
 
 Documentation about the docker container available [here](https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker)
 ```
+# Creating the container with SQL Server 2019
 docker run \
     -e 'ACCEPT_EULA=Y' \
-    -e 'SA_PASSWORD=MyStrongPasswordForSQLServer#2019!' \
+    -e 'SA_PASSWORD=MyStrongPasswordForSQLServer2019!' \
     -p 1433:1433 \
     --name sqlserver \
     --rm \
     -d \
     mcr.microsoft.com/mssql/server:2019-latest
 
-docker exec -it sqlserver mkdir /var/opt/mssql/backup
+# Copying the files to create the BikeStores database
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores-drop-all-objects.sql sqlserver:/tmp
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores-create-objects.sql sqlserver:/tmp
+docker cp src/aeda/sql_scripts/mssqlserver/BikeStores-load-data.sql sqlserver:/tmp
 
-docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - create objects.sql sqlserver:/var/opt/mssql/backup
-docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - drop all objects.sql sqlserver:/var/opt/mssql/backup
-docker cp src/aeda/sql_scripts/mssqlserver/BikeStores Sample Database - load data.sql sqlserver:/var/opt/mssql/backup
+# Executing the .sql files
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyStrongPasswordForSQLServer2019! -i /tmp/BikeStores-drop-all-objects.sql
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyStrongPasswordForSQLServer2019! -i /tmp/BikeStores-create-objects.sql
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyStrongPasswordForSQLServer2019! -i /tmp/BikeStores-load-data.sql
+
+# Copying and creating the metadata database
+docker cp src/aeda/sql_scripts/mssqlserver/mssqlserver.sql sqlserver:/tmp
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyStrongPasswordForSQLServer2019! -i /tmp/mssqlserver.sql
 ```
