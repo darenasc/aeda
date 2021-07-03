@@ -2,7 +2,9 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
 
+import mariadb
 import pymysql
+import pyodbc
 import psycopg2
 import sqlite3
 
@@ -56,7 +58,7 @@ def get_db_connection(conn_string):
             )
         except Exception:
             raise
-    elif conn_string["db_engine"] == "mysql":
+    elif conn_string["db_engine"] in ["mysql"]:
         try:
             conn = pymysql.connect(
                 host=conn_string["host"],
@@ -66,5 +68,35 @@ def get_db_connection(conn_string):
                 port=int(conn_string["port"]),
             )
         except Exception:
+            raise
+    elif conn_string["db_engine"] == "mssqlserver":
+        try:
+            conn = pyodbc.connect(
+                DRIVER="{ODBC Driver 17 for SQL Server}",
+                server=conn_string["host"],
+                database=conn_string["catalog"],
+                user=conn_string["user"],
+                tds_version="7.4",
+                password=conn_string["password"],
+                port=conn_string["port"],
+            )
+        except Exception:
+            raise
+    elif conn_string["db_engine"] == "mariadb":
+        try:
+            conn = mariadb.connect(
+                user=conn_string["user"],
+                password=conn_string["password"],
+                host=conn_string["host"],
+                port=int(conn_string["port"]),
+                database=conn_string["schema"],
+            )
+        except:
+            raise
+    elif conn_string["db_engine"] == "sqlite3":
+        try:
+            dbname = str(conn_string["schema"] + ".db")
+            conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
+        except:
             raise
     return conn

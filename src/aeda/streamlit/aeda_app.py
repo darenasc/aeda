@@ -37,6 +37,11 @@ Schema: `{}`""".format(
 connection_string = _config.get_db_connection_string(add_selectbox)
 conn = _config.get_db_connection(connection_string)
 
+st.subheader("Servers")
+query_servers = """select * from servers;"""
+df_servers = pd.read_sql(query_servers, conn)
+df_servers
+
 st.subheader("Tables")
 query_tables = """select * from tables;"""
 df_tables = pd.read_sql(query_tables, conn)
