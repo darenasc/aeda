@@ -8,6 +8,7 @@ import pymysql
 import psycopg2
 import pyodbc
 import sqlite3
+from termcolor import colored
 
 from config import CONFIG_DB, SQL_SCRIPTS
 
@@ -108,3 +109,33 @@ def get_db_connection(conn_string):
             logger.error("Database connection error")
             raise
     return conn
+
+
+def check_database_connection(conn_string: str):
+    try:
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        print(
+            "[",
+            colored("OK", "green"),
+            "]",
+            "\tConnection to the {}.{}.{} source tested successfully...".format(
+                conn_string["host"], conn_string["catalog"], conn_string["schema"]
+            ),
+        )
+        cursor.close()
+        conn.close()
+    except:
+        print(
+            "[",
+            colored("Error", "red"),
+            "]",
+            "\tCan't establish connection to the metadata database...",
+        )
+    return
+
+
+def check_database_connections(conn_string_source, conn_string_metadata):
+    check_database_connection(conn_string_source)
+    check_database_connection(conn_string_metadata)
+    return

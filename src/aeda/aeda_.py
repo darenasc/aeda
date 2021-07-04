@@ -52,6 +52,8 @@ def explore(source: str, metadata: str, level: str = "server"):
     ), "{} is not supported.".format(conn_string_metadata["dn_engine"])
     assert level in EXPLORATION_LEVELS, "{} is not supported.".format(level)
 
+    _utils.check_database_connections(conn_string_source, conn_string_metadata)
+
     if level == "server":
         _sql.insert_or_update_columns(db_engine_source, db_engine_metadata)
         _sql.insert_or_update_tables(db_engine_source, db_engine_metadata)
