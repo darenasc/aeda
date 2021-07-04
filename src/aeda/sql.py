@@ -314,7 +314,7 @@ def insert_or_update_tables(
 
     table_rows = get_tables(db_engine_source, db_engine_metadata)
     # logger.info("{} tables to be inserted into `tables`".format(len(table_rows)))
-    pbar = tqdm(table_rows, desc = "Tables: ")
+    pbar = tqdm(table_rows, desc="Tables: ")
     for row in pbar:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
@@ -487,7 +487,6 @@ def insert_or_update_uniques(
 
         return True if rowcount > 0 else False
 
-
     def delete_from_uniques(
         db_engine_metadata,
         server_name,
@@ -512,7 +511,7 @@ def insert_or_update_uniques(
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
 
     # logger.info("{} tables counting unique and null values".format(len(table_rows)))
-    pbar = tqdm(table_rows, desc = "Uniques")
+    pbar = tqdm(table_rows, desc="Uniques")
     for row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = row
         pbar.set_description("Uniques - {}".format(table_name))
@@ -525,7 +524,7 @@ def insert_or_update_uniques(
         column_rows = get_columns_from_metadata(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        pbar1 = tqdm(column_rows, leave = False)
+        pbar1 = tqdm(column_rows, leave=False)
         for column_row in pbar1:
             column_name, ordinal_position, data_type = column_row
             pbar1.set_description("Uniques - {}.{}".format(table_name, column_name))
@@ -695,7 +694,7 @@ def insert_or_update_data_values(
         return row[0]
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    pbar = tqdm(table_rows, desc = "Data values")
+    pbar = tqdm(table_rows, desc="Data values")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
         pbar.set_description("Data values - {}".format(table_name))
@@ -863,14 +862,14 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    pbar = tqdm(table_rows, desc = "Dates")
+    pbar = tqdm(table_rows, desc="Dates")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
         pbar.set_description("Dates {}".format(table_name))
         column_rows = get_date_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        pbar1 = tqdm(column_rows, leave = False, desc = "Dates")
+        pbar1 = tqdm(column_rows, leave=False, desc="Dates")
         for column_row in pbar1:
             _, _, _, _, column_name = column_row
             pbar1.set_description("Dates - {}.{}".format(table_name, column_name))
@@ -1039,7 +1038,7 @@ def insert_or_update_stats(
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    pbar = tqdm(table_rows, desc = "Stats")
+    pbar = tqdm(table_rows, desc="Stats")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
         pbar.set_description("Stats - {}".format(table_name))
@@ -1049,7 +1048,7 @@ def insert_or_update_stats(
         data = []
         if with_percentiles:
             percentiles = []
-        pbar1 = tqdm(column_rows, leave = False, desc = "Stats")
+        pbar1 = tqdm(column_rows, leave=False, desc="Stats")
         for column_row in pbar1:
             _, _, _, _, column_name = column_row
             pbar1.set_description("Stats - {}.{}".format(table_name, column_name))

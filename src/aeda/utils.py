@@ -115,14 +115,24 @@ def check_database_connection(conn_string: str):
     try:
         conn = get_db_connection(conn_string)
         cursor = conn.cursor()
-        print(
-            "[",
-            colored("OK", "green"),
-            "]",
-            "\tConnection to the {}.{}.{} source tested successfully...".format(
-                conn_string["host"], conn_string["catalog"], conn_string["schema"]
-            ),
-        )
+        if conn_string["db_engine"] == "sqlite3":
+            print(
+                "[",
+                colored("OK", "green"),
+                "]",
+                "\tConnection to the {}.db source tested successfully...".format(
+                    conn_string["schema"]
+                ),
+            )
+        else:
+            print(
+                "[",
+                colored("OK", "green"),
+                "]",
+                "\tConnection to the {}.{}.{} source tested successfully...".format(
+                    conn_string["host"], conn_string["catalog"], conn_string["schema"]
+                ),
+            )
         cursor.close()
         conn.close()
     except:
