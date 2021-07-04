@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import sqlite3
+from tqdm import tqdm
 
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 import utils as _utils
@@ -83,78 +84,77 @@ def insert_into_table():
     pass
 
 
-def check_if_record_exists(
-    db_engine_metadata,
-    server_name,
-    table_catalog,
-    table_schema,
-    table_name,
-    column_name,
-):
-    conn_string = _utils.get_db_connection_string(db_engine_metadata)
-    query = SQL_SCRIPTS["check_if_column_exists"][conn_string["db_engine"]]
-    conn = _utils.get_db_connection(conn_string)
-    cursor = conn.cursor()
-    cursor.execute(
-        query, (server_name, table_catalog, table_schema, table_name, column_name)
-    )
-    rows = cursor.fetchall()
-    rowcount = len(rows)
-    cursor.close()
-    conn.close()
-
-    if rowcount > 0:
-        return False
-    else:
-        return True
-
-
-def delete_from_columns(
-    db_engine_metadata,
-    server_name,
-    table_catalog,
-    table_schema,
-    table_name,
-    column_name,
-):
-    conn_string = _utils.get_db_connection_string(db_engine_metadata)
-    conn = _utils.get_db_connection(conn_string)
-    query = SQL_SCRIPTS["delete_from_columns"][conn_string["db_engine"]]
-    cursor = conn.cursor()
-    cursor.execute(
-        query, (server_name, table_catalog, table_schema, table_name, column_name)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return
-
-
 def insert_or_update_columns(
     db_engine_source, db_engine_metadata: str, overwrite: bool = True
 ):
+    def check_if_column_exists(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["check_if_column_exists"][conn_string["db_engine"]]
+        conn = _utils.get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, table_catalog, table_schema, table_name, column_name)
+        )
+        rows = cursor.fetchall()
+        rowcount = len(rows)
+        cursor.close()
+        conn.close()
+
+        if rowcount > 0:
+            return False
+        else:
+            return True
+
+    def delete_from_columns(
+        db_engine_metadata,
+        server_name,
+        table_catalog,
+        table_schema,
+        table_name,
+        column_name,
+    ):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = _utils.get_db_connection(conn_string)
+        query = SQL_SCRIPTS["delete_from_columns"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+        cursor.execute(
+            query, (server_name, table_catalog, table_schema, table_name, column_name)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return
+
     column_rows = get_columns(db_engine_source)
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = _utils.get_db_connection(conn_string)
     query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
     cursor = conn.cursor()
-    if conn_string["db_engine"] == "sqlite3":
-        logger.info(
-            "Inserting {} rows into `{}.db`".format(
-                len(column_rows),
-                conn_string["schema"],
-            )
-        )
-    else:
-        logger.info(
-            "Inserting {} rows into `{}.{}.{}`".format(
-                len(column_rows),
-                conn_string["host"],
-                conn_string["catalog"],
-                conn_string["schema"],
-            )
-        )
-    for row in column_rows:
+    # if conn_string["db_engine"] == "sqlite3":
+    #     logger.info(
+    #         "Inserting {} rows into `{}.db`".format(
+    #             len(column_rows),
+    #             conn_string["schema"],
+    #         )
+    #     )
+    # else:
+    #     logger.info(
+    #         "Inserting {} rows into `{}.{}.{}`".format(
+    #             len(column_rows),
+    #             conn_string["host"],
+    #             conn_string["catalog"],
+    #             conn_string["schema"],
+    #         )
+    #     )
+    pbar = tqdm(column_rows, desc="Columns - ")
+    for row in pbar:
         (
             server_name,
             table_catalog,
@@ -164,7 +164,8 @@ def insert_or_update_columns(
             ordinal_position,
             data_type,
         ) = row
-        if overwrite and check_if_record_exists(
+        pbar.set_description("Columns: {}.{}".format(table_name, column_name))
+        if overwrite and check_if_column_exists(
             db_engine_metadata,
             server_name,
             table_catalog,
@@ -195,22 +196,22 @@ def insert_or_update_columns(
             )
             conn.commit()
     cursor.close()
-    if conn_string["db_engine"] == "sqlite3":
-        logger.info(
-            "{} rows inserted into `{}.db`".format(
-                len(column_rows),
-                conn_string["schema"],
-            )
-        )
-    else:
-        logger.info(
-            "{} rows inserted into `{}.{}.{}`".format(
-                len(column_rows),
-                conn_string["host"],
-                conn_string["catalog"],
-                conn_string["schema"],
-            )
-        )
+    # if conn_string["db_engine"] == "sqlite3":
+    #     logger.info(
+    #         "{} rows inserted into `{}.db`".format(
+    #             len(column_rows),
+    #             conn_string["schema"],
+    #         )
+    #     )
+    # else:
+    #     logger.info(
+    #         "{} rows inserted into `{}.{}.{}`".format(
+    #             len(column_rows),
+    #             conn_string["host"],
+    #             conn_string["catalog"],
+    #             conn_string["schema"],
+    #         )
+    #     )
     return
 
 
@@ -312,8 +313,9 @@ def insert_or_update_tables(
     query_update = SQL_SCRIPTS["update_tables"][conn_string_metadata["db_engine"]]
 
     table_rows = get_tables(db_engine_source, db_engine_metadata)
-    logger.info("{} tables to be inserted into `tables`".format(len(table_rows)))
-    for row in table_rows:
+    # logger.info("{} tables to be inserted into `tables`".format(len(table_rows)))
+    pbar = tqdm(table_rows, desc="Tables: ")
+    for row in pbar:
         server_name, catalog_name, schema_name, table_name = row
         _, _, _, _, n_columns, n_rows = get_number_of_columns(
             db_engine_source,
@@ -323,6 +325,7 @@ def insert_or_update_tables(
             schema_name,
             table_name,
         )
+        pbar.set_description("Tables - {}".format(table_name))
         if (
             check_if_table_exists(
                 db_engine_metadata, server_name, catalog_name, schema_name, table_name
@@ -347,7 +350,7 @@ def insert_or_update_tables(
     cursor.close()
     conn.close()
 
-    logger.info("{} tables inserted into `tables`".format(len(table_rows)))
+    # logger.info("{} tables inserted into `tables`".format(len(table_rows)))
 
     return
 
@@ -482,10 +485,7 @@ def insert_or_update_uniques(
         cursor.close()
         conn.close()
 
-        if rowcount > 0:
-            return True
-        else:
-            return False
+        return True if rowcount > 0 else False
 
     def delete_from_uniques(
         db_engine_metadata,
@@ -510,10 +510,11 @@ def insert_or_update_uniques(
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
 
-    logger.info("{} tables counting unique and null values".format(len(table_rows)))
-
-    for row in table_rows:
+    # logger.info("{} tables counting unique and null values".format(len(table_rows)))
+    pbar = tqdm(table_rows, desc="Uniques")
+    for row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = row
+        pbar.set_description("Uniques - {} {} rows".format(table_name, n_rows))
         if check_if_unique_exists(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         ):
@@ -523,8 +524,10 @@ def insert_or_update_uniques(
         column_rows = get_columns_from_metadata(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        for column_row in column_rows:
+        pbar1 = tqdm(column_rows, leave=False)
+        for column_row in pbar1:
             column_name, ordinal_position, data_type = column_row
+            pbar1.set_description("Uniques - {}.{}".format(table_name, column_name))
             count_distinct, count_null = get_unique_values(
                 db_engine_source, table_name, column_name
             )
@@ -541,7 +544,7 @@ def insert_or_update_uniques(
                 int(count_distinct),
                 int(count_null),
             )
-        logger.info("{} columns inserted into `uniques`".format(len(column_rows)))
+        # logger.info("{} columns inserted into `uniques`".format(len(column_rows)))
 
 
 def insert_or_update_data_values(
@@ -691,14 +694,17 @@ def insert_or_update_data_values(
         return row[0]
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    for table_row in table_rows:
+    pbar = tqdm(table_rows, desc="Data values")
+    for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-
+        pbar.set_description("Data values - {} {} rows".format(table_name, n_rows))
         column_rows = get_columns_from_metadata(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        for j, column_row in enumerate(column_rows):
+        pbar1 = tqdm(column_rows, leave=False)
+        for column_row in pbar1:
             column_name, ordinal_position, data_type = column_row
+            pbar1.set_description("Data values - {}.{}".format(table_name, column_name))
             num_uniques = get_num_distinct_values(
                 db_engine_metadata,
                 server_name,
@@ -708,11 +714,11 @@ def insert_or_update_data_values(
                 column_name,
             )
             if num_uniques > threshold:
-                logger.info(
-                    "{}.{}.{} has {} unique values, more than the threshold {}".format(
-                        table_name, column_name, value, num_uniques, threshold
-                    )
-                )
+                # logger.info(
+                #     "{}.{}.{} has {} unique values, more than the threshold {}".format(
+                #         table_name, column_name, value, num_uniques, threshold
+                #     )
+                # )
                 continue
             if check_if_data_value_exists(
                 db_engine_metadata,
@@ -748,11 +754,6 @@ def insert_or_update_data_values(
                         int(num_rows),
                     )
                 )
-            logger.info(
-                "Inserting {} records into `data_values` for {}.{} {}/{}".format(
-                    len(data), table_name, column_name, j + 1, len(column_rows)
-                )
-            )
             # insert_into_data_values(
             #     db_engine_metadata,
             #     server_name,
@@ -861,13 +862,17 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    for table_row in table_rows:
+    pbar = tqdm(table_rows, desc="Dates")
+    for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
+        pbar.set_description("Dates {} {} rows".format(table_name, n_rows))
         column_rows = get_date_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        for column_row in column_rows:
+        pbar1 = tqdm(column_rows, leave=False, desc="Dates")
+        for column_row in pbar1:
             _, _, _, _, column_name = column_row
+            pbar1.set_description("Dates - {}.{}".format(table_name, column_name))
             if check_if_dates_exists(
                 db_engine_metadata,
                 server_name,
@@ -1033,16 +1038,20 @@ def insert_or_update_stats(
         return
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
-    for table_row in table_rows:
+    pbar = tqdm(table_rows, desc="Stats")
+    for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
+        pbar.set_description("Stats - {}".format(table_name))
         column_rows = get_numeric_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
         data = []
         if with_percentiles:
             percentiles = []
-        for column_row in column_rows:
+        pbar1 = tqdm(column_rows, leave=False, desc="Stats")
+        for column_row in pbar1:
             _, _, _, _, column_name = column_row
+            pbar1.set_description("Stats - {}.{}".format(table_name, column_name))
             if check_if_stats_exists(
                 db_engine_metadata,
                 server_name,
@@ -1119,20 +1128,21 @@ def insert_or_update_stats(
                 )
             )
         if len(data) > 0:
-            logger.info(
-                "Inserting {} records into `stats` for {}.{}".format(
-                    len(data), schema_name, table_name
-                )
-            )
+            # logger.info(
+            #     "Inserting {} records into `stats` for {}.{}".format(
+            #         len(data), schema_name, table_name
+            #     )
+            # )
             insert_many_into_stats(db_engine_metadata, data)
             if with_percentiles:
                 update_percentiles(db_engine_metadata, percentiles)
         else:
-            logger.info(
-                "{} numeric columns found in {}.{}".format(
-                    len(data), schema_name, table_name
-                )
-            )
+            # logger.info(
+            #     "{} numeric columns found in {}.{}".format(
+            #         len(data), schema_name, table_name
+            #     )
+            # )
+            pass
 
 
 def get_columns(db_engine_source: str):
@@ -1146,14 +1156,14 @@ def get_columns(db_engine_source: str):
     )
     rows = cursor.fetchall()
 
-    logger.info(
-        "{} columns from {}.{}.{}".format(
-            len(rows),
-            conn_string["host"],
-            conn_string["catalog"],
-            conn_string["schema"],
-        )
-    )
+    # logger.info(
+    #     "{} columns from {}.{}.{}".format(
+    #         len(rows),
+    #         conn_string["host"],
+    #         conn_string["catalog"],
+    #         conn_string["schema"],
+    #     )
+    # )
 
     cursor.close()
     conn.close()
