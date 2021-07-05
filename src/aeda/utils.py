@@ -7,7 +7,9 @@ import mariadb
 import pymysql
 import psycopg2
 import pyodbc
+import snowflake.connector
 import sqlite3
+from termcolor import colored
 
 from config import CONFIG_DB, SQL_SCRIPTS
 
@@ -107,4 +109,57 @@ def get_db_connection(conn_string):
         except:
             logger.error("Database connection error")
             raise
+    elif conn_string["db_engine"] == "snowflake":
+        try:
+            conn = snowflake.connector.connect(
+                user=conn_string["user"],
+                password=conn_string["password"],
+                account=conn_string["host"],
+                warehouse=conn_string["warehouse"],
+                database=conn_string["catalog"],
+                schema=conn_string["schema"],
+            )
+        except:
+            logger.error("Database connection error")
+            raise
     return conn
+
+
+def check_database_connection(conn_string: str):
+    try:
+        conn = get_db_connection(conn_string)
+        cursor = conn.cursor()
+        if conn_string["db_engine"] == "sqlite3":
+            print(
+                "[",
+                colored("OK", "green"),
+                "]",
+                "\tConnection to the {}.db source tested successfully...".format(
+                    conn_string["schema"]
+                ),
+            )
+        else:
+            print(
+                "[",
+                colored("OK", "green"),
+                "]",
+                "\tConnection to the {}.{}.{} source tested successfully...".format(
+                    conn_string["host"], conn_string["catalog"], conn_string["schema"]
+                ),
+            )
+        cursor.close()
+        conn.close()
+    except:
+        print(
+            "[",
+            colored("Error", "red"),
+            "]",
+            "\tCan't establish connection to the metadata database...",
+        )
+    return
+
+
+def check_database_connections(conn_string_source, conn_string_metadata):
+    check_database_connection(conn_string_source)
+    check_database_connection(conn_string_metadata)
+    return

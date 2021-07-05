@@ -19,6 +19,7 @@ typer = "*"
 tqdm = "*"
 termcolor = "*"
 mariadb = "*"
+snowflake-connector-python = "*"
 
 [requires]
 python_version = "3.8"
