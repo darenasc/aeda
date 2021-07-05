@@ -85,8 +85,16 @@ def insert_into_table():
 
 
 def insert_or_update_columns(
-    db_engine_source, db_engine_metadata: str, overwrite: bool = True
+    db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
 ):
+    """
+    Parameters:
+        db_engine_source (str): Section in the .ini file with databases connection parameters.
+
+        db_engine_metadata (str): 
+
+        overwrite (bool) = True
+    """
     def check_if_column_exists(
         db_engine_metadata,
         server_name,
@@ -132,17 +140,6 @@ def insert_or_update_columns(
         conn.close()
         return
 
-def insert_or_update_columns(
-    db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
-):
-    """
-    Parameters:
-        db_engine_source (str): Section in the .ini file with databases connection parameters.
-
-        db_engine_metadata (str): 
-
-        overwrite (bool) = True
-    """
     column_rows = get_columns(db_engine_source)
     conn_string = _utils.get_db_connection_string(db_engine_metadata)
     conn = _utils.get_db_connection(conn_string)
