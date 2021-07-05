@@ -6,7 +6,7 @@ SQLITE3_DB_DIR = AEDA_DIR / "metadata" / "aeda_metadata.db"
 SQL_SCRIPTS_DIR = AEDA_DIR / "sql_scripts"
 CONFIG_DB = AEDA_DIR / "connection_strings" / "databases.ini"
 
-SUPPORTED_DB_ENGINES = ["sqlite3", "mysql", "postgres", "mssqlserver", "mariadb"]
+SUPPORTED_DB_ENGINES = ["sqlite3", "mysql", "postgres", "mssqlserver", "mariadb", "snowflake"]
 EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 
 SQL_CREATE_SCRIPTS = {

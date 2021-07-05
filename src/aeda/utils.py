@@ -7,6 +7,7 @@ import mariadb
 import pymysql
 import psycopg2
 import pyodbc
+import snowflake.connector
 import sqlite3
 from termcolor import colored
 
@@ -105,6 +106,19 @@ def get_db_connection(conn_string):
         try:
             dbname = str(conn_string["schema"] + ".db")
             conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
+        except:
+            logger.error("Database connection error")
+            raise
+    elif conn_string["db_engine"] == "snowflake":
+        try:
+            conn = snowflake.connector.connect(
+                user=conn_string["user"],
+                password=conn_string["password"],
+                account=conn_string["host"],
+                warehouse=conn_string["warehouse"],
+                database=conn_string["catalog"],
+                schema=conn_string["schema"]
+            )
         except:
             logger.error("Database connection error")
             raise

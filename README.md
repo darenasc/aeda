@@ -1,5 +1,16 @@
 # aeda (automated-exploratory-data-analysis)
 
+Supported databases:
+
+| DB | SOURCE | METADATA |
+| --- | --- | --- |
+| MySQL | :white_check_mark: | :white_check_mark: |
+| MariaDB | :white_check_mark: | :white_check_mark: |
+| Postgres | :white_check_mark: | :white_check_mark: |
+| MSSQLServer | :white_check_mark: | :white_check_mark: |
+| SQLite3 | | :white_check_mark: |
+| Snowflake | | :white_check_mark: |
+
 To create test databases.
 ```
 python aeda_.py create_db sqlite3

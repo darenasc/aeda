@@ -55,14 +55,15 @@ def explore(source: str, metadata: str, level: str = "server"):
     _utils.check_database_connections(conn_string_source, conn_string_metadata)
 
     if level == "server":
-        _sql.insert_or_update_columns(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_tables(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_dates(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_stats(
-            db_engine_source, db_engine_metadata, with_percentiles=True
-        )
+        # _sql.insert_or_update_columns(db_engine_source, db_engine_metadata)
+        # _sql.insert_or_update_tables(db_engine_source, db_engine_metadata)
+        # _sql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
+        # _sql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
+        # _sql.insert_or_update_dates(db_engine_source, db_engine_metadata)
+        # _sql.insert_or_update_stats(
+        #     db_engine_source, db_engine_metadata, with_percentiles=True
+        # )
+        pass
 
     return
 
