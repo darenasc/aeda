@@ -117,7 +117,7 @@ def get_db_connection(conn_string):
                 account=conn_string["host"],
                 warehouse=conn_string["warehouse"],
                 database=conn_string["catalog"],
-                schema=conn_string["schema"]
+                schema=conn_string["schema"],
             )
         except:
             logger.error("Database connection error")

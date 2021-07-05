@@ -6,7 +6,14 @@ SQLITE3_DB_DIR = AEDA_DIR / "metadata" / "aeda_metadata.db"
 SQL_SCRIPTS_DIR = AEDA_DIR / "sql_scripts"
 CONFIG_DB = AEDA_DIR / "connection_strings" / "databases.ini"
 
-SUPPORTED_DB_ENGINES = ["sqlite3", "mysql", "postgres", "mssqlserver", "mariadb", "snowflake"]
+SUPPORTED_DB_ENGINES = [
+    "sqlite3",
+    "mysql",
+    "postgres",
+    "mssqlserver",
+    "mariadb",
+    "snowflake",
+]
 EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 
 SQL_CREATE_SCRIPTS = {
@@ -298,7 +305,7 @@ SQL_SCRIPTS = {
                     FROM {1}.{2}
                     GROUP BY DATEFROMPARTS(YEAR({0}), MONTH({0}), 1)
                     ORDER BY N DESC;""",
-        },
+    },
     "get_basic_stats": {
         "mysql": """SELECT CAST(AVG(`{0}`) as FLOAT) AS AVG_
                     , CAST(STD(`{0}`) as FLOAT) as STDEV_
@@ -332,7 +339,7 @@ SQL_SCRIPTS = {
                     , CAST(MIN(`{0}`) as FLOAT) AS MIN_
                     , CAST(MAX(`{0}`) - MIN(`{0}`) AS FLOAT) as RANGE_
                     FROM {1}.{2};""",
-        },
+    },
     "get_percentiles": {
         "mysql": """with cte1 as 
             (select `{0}`

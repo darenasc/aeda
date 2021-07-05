@@ -3,7 +3,7 @@
 Supported databases:
 
 | DB | SOURCE | METADATA |
-| --- | --- | --- |
+| --- |:---:|:---:|
 | MySQL | :white_check_mark: | :white_check_mark: |
 | MariaDB | :white_check_mark: | :white_check_mark: |
 | Postgres | :white_check_mark: | :white_check_mark: |
