@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import sqlite3
+from pymysql.cursors import Cursor
 from tqdm import tqdm
 
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
@@ -84,6 +85,11 @@ def insert_into_table():
     pass
 
 
+def get_chunks(data: list, n: int = 5_000):
+    for i in range(0, len(data), n):
+        yield data[i:i + n]
+
+
 def insert_or_update_columns(
     db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
 ):
@@ -140,27 +146,27 @@ def insert_or_update_columns(
         conn.close()
         return
 
+
+    def insert_many_into_columns(db_engine_metadata, data):
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        conn = _utils.get_db_connection(conn_string)
+        query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
+        cursor = conn.cursor()
+
+        for _ in tqdm(get_chunks(data)):
+            cursor.executemany(query, (_))
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+        return
+
     column_rows = get_columns(db_engine_source)
-    conn_string = _utils.get_db_connection_string(db_engine_metadata)
-    conn = _utils.get_db_connection(conn_string)
-    query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
-    cursor = conn.cursor()
-    # if conn_string["db_engine"] == "sqlite3":
-    #     logger.info(
-    #         "Inserting {} rows into `{}.db`".format(
-    #             len(column_rows),
-    #             conn_string["schema"],
-    #         )
-    #     )
-    # else:
-    #     logger.info(
-    #         "Inserting {} rows into `{}.{}.{}`".format(
-    #             len(column_rows),
-    #             conn_string["host"],
-    #             conn_string["catalog"],
-    #             conn_string["schema"],
-    #         )
-    #     )
+    # conn_string = _utils.get_db_connection_string(db_engine_metadata)
+    # conn = _utils.get_db_connection(conn_string)
+    # query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
+    # cursor = conn.cursor()
+    data = []
     pbar = tqdm(column_rows, desc="Columns - ")
     for row in pbar:
         (
@@ -172,6 +178,7 @@ def insert_or_update_columns(
             ordinal_position,
             data_type,
         ) = row
+        
         pbar.set_description("Columns: {}.{}".format(table_name, column_name))
         if overwrite and check_if_column_exists(
             db_engine_metadata,
@@ -190,36 +197,28 @@ def insert_or_update_columns(
                 column_name,
             )
 
-            cursor.execute(
-                query,
-                (
-                    server_name,
+            data.append((server_name,
                     table_catalog,
                     table_schema,
                     table_name,
                     column_name,
                     ordinal_position,
-                    data_type,
-                ),
-            )
-            conn.commit()
-    cursor.close()
-    # if conn_string["db_engine"] == "sqlite3":
-    #     logger.info(
-    #         "{} rows inserted into `{}.db`".format(
-    #             len(column_rows),
-    #             conn_string["schema"],
+                    data_type))
+    insert_many_into_columns(db_engine_metadata, data)
+    #         cursor.execute(
+    #             query,
+    #             (
+    #                 server_name,
+    #                 table_catalog,
+    #                 table_schema,
+    #                 table_name,
+    #                 column_name,
+    #                 ordinal_position,
+    #                 data_type,
+    #             ),
     #         )
-    #     )
-    # else:
-    #     logger.info(
-    #         "{} rows inserted into `{}.{}.{}`".format(
-    #             len(column_rows),
-    #             conn_string["host"],
-    #             conn_string["catalog"],
-    #             conn_string["schema"],
-    #         )
-    #     )
+    #         conn.commit()
+    # cursor.close()
     return
 
 

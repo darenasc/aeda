@@ -39,6 +39,10 @@ def explore(source: str, metadata: str, level: str = "server"):
 
         level (str): ['server', 'catalog', 'schema', 'table', 'view', 'query']
     """
+
+    
+    _utils.get_quote()
+
     db_engine_source = source
     db_engine_metadata = metadata
     conn_string_source = _utils.get_db_connection_string(db_engine_source)

@@ -1,13 +1,14 @@
 from configparser import ConfigParser
 import logging
 from pathlib import Path
+import requests
 from typing import Union
 
 import mariadb
 import pymysql
 import psycopg2
 import pyodbc
-import snowflake.connector
+# import snowflake.connector
 import sqlite3
 from termcolor import colored
 
@@ -163,3 +164,9 @@ def check_database_connections(conn_string_source, conn_string_metadata):
     check_database_connection(conn_string_source)
     check_database_connection(conn_string_metadata)
     return
+
+
+def get_quote():
+    url_affirmations = "https://www.affirmations.dev"
+    message = requests.get(url_affirmations).json()
+    print(message["affirmation"])
