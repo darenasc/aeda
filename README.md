@@ -1,102 +1,98 @@
-# aeda (automated-exploratory-data-analysis)
+# AEDA stands for Automated Exploratory Data Analysis
 
-Supported databases:
+![](https://img.shields.io/github/license/darenasc/aeda)
+![](https://img.shields.io/github/last-commit/darenasc/aeda)
+![](https://img.shields.io/github/stars/darenasc/aeda?style=social)
 
-| Database | SOURCE | METADATA |
-| --- |:---:|:---:|
-| <img alt="MySQL" src="https://img.shields.io/badge/MySQL-SOURCE_/_METADATA-green?logo=mysql"/> | :white_check_mark: | :white_check_mark: |
-| <img alt="MariDB" src="https://img.shields.io/badge/MariaDB-SOURCE_/_METADATA-green?logo=mariadb"/> | :white_check_mark: | :white_check_mark: |
-| <img alt="Postgres" src="https://img.shields.io/badge/Postgres-SOURCE_/_METADATA-green?logo=postgresql"/> | :white_check_mark: | :white_check_mark: |
-| <img alt="MSSQLServer" src="https://img.shields.io/badge/MS_SQL_Server-SOURCE_/_METADATA-green"/> | :white_check_mark: | :white_check_mark: |
-| <img alt="SQLite3" src="https://img.shields.io/badge/SQLite3-METADATA-green?logo=sqlite"/> | | :white_check_mark: |
-| <img alt="Snowflake" src="https://img.shields.io/badge/Snowflake-METADATA-green?logo=snowflake"/> | | :white_check_mark: |
+**AEDA** is a library to automatically profile any [supported database](docs/supported_databases.md) 
+using a reading access connection to the database. The results of the profiling 
+will be stored to a second [supported database](docs/supported_databases.md) 
+that you need write priviledges.
 
+**AEDA** generates SQL queries to be executed in the source database and 
+store the results in a metadata database.
 
-To create test databases.
-```
-python aeda_.py create_db sqlite3
-python aeda_.py create_db mysql --section mysql-metadata
-python aeda_.py create_db mysql --section mysql-demo
+## Usage
 
-python aeda_.py explore mysql-demo mysql-metadata
-python aeda_.py explore mysql-demo postgres-metadata
-python aeda_.py explore postgres-demo mysql-metadata
-python aeda_.py explore postgres-demo postgres-metadata
+0. Download or clone this repository.
 
-python aeda_.py explore postgres-demo sqlserver-metadata
-python aeda_.py explore mysql-demo sqlserver-metadata
-python aeda_.py explore mysql-demo sqlserver-metadata
-python aeda_.py explore sqlserver-production sqlserver-metadata
-python aeda_.py explore sqlserver-production mysql-metadata
-python aeda_.py explore sqlserver-production postgres-metadata
-python aeda_.py explore sqlserver-sales sqlserver-metadata
-python aeda_.py explore sqlserver-sales mysql-metadata
-python aeda_.py explore sqlserver-sales postgres-metadata
+1. Create a `databases.ini` file that can be a copy of 
+[`databases_template.ini`](src/aeda/connection_strings/databases_template.ini) 
+and just rename it. 
 
-python aeda_.py explore mariadb-world sqlserver-metadata
-python aeda_.py explore sqlserver-production mariadb-metadata
-python aeda_.py explore sqlserver-sales mariadb-metadata
+2. Add two database connection descriptions. One for the `source database` 
+(the database you want to run the profiling, with reading priviledges) and one 
+for the `metadata database`, with writing priviledges, where the resutls will be 
+stored.
 
-python aeda_.py explore sqlserver-production sqlite3-metadata
-python aeda_.py explore sqlserver-sales sqlite3-metadata
-```
+```CONF
+[my-source-database]
+db_engine = <A-SUPPORTED-DB-ENGINE>
+host = <IP-OR-HOSTNAME-SOURCE-DATABASE>
+database = <SOURCE-DATABASE-NAME>
+user = <SOURCE-USER>
+pass = <SOURCE-PASSWORD>
+port = <SOURCE-PORT>
 
-To run the `aeda`:
-```
-python aeda_.py explore mysql-demo mysql-metadata
+[my-metadata-database]
+db_engine = <A-SUPPORTED-DB-ENGINE>
+host = <IP-OR-HOSTNAME-METADATA-DATABASE>
+database = <METADATA-DATABASE-NAME>
+user = <METADATA-USER>
+pass = <METADATA-PASSWORD>
+port = <METADATA-PORT>
 ```
 
-Where `mysql-demo` and `mysql-metadata` are sections in the `databases.ini` configuration file.
+The supported database engines, to fill the `db_engine` property in the `databases.ini` 
+file are:
 
-## Connections
+* [x] `sqlite3`
+* [x] `mysql`
+* [x] `postgres`
+* [x] `mssqlserver`
+* [x] `mariadb`
+* [x] `snowflake`
 
-Connections are declared in `databases.ini`.
+You could create a SQLite3 local database or create metadata databases using `MySQL`, 
+`PostgreSQL`, or `MS SQL Server`. Using the following commands from the terminal 
+in the `src/aeda` folder:
 
 ```
-[<REFERENCE-NAME>]
-db_engine = <DB-ENGINE>
-host = <HOST>
-schema = <SCHEMA>
-catalog = <CATALOG>
-user = <USER>
-password = <PASSWORD>
-port = <PORT>
-encoding = <>
+python aeda_.py create_db sqlite3 # Creates a sqlite3 database by default, or
+python aeda_.py create_db mysql --section <YOUR-MYSQL-DATABASE>
 ```
 
-| ENGINE | QUERY | DESCRIPTION |
-| --- | --- | --- |
-| `source` | `columns` | Gets the column names from the `INFORMATION_SCHEMA` or similar filtering by `catalog` and `schema`.|
-| `source` | `number_of_columns` | Gets the number of rows per table from the `INFORMATION_SCHEMA` or similar from the `source` |
-| `source` | `number_of_rows` | Gets the number of rows per table from the `source` |
-| `source` | `get_unique_count` | |
-| `source` | `get_frequency` | |
-| `source` | `get_first_day_of_month` | |
-| `source` | `get_basic_stats` | |
-| `source` | `get_percentiles` | |
-| `metadata` | `tables` | |
-| `metadata` | `insert_into_columns` | |
-| `metadata` | `insert_into_tables` | |
-| `metadata` | `insert_into_uniques` | |
-| `metadata` | `insert_into_data_values` | |
-| `metadata` | `insert_into_dates` | |
-| `metadata` | `insert_into_stats` | |
-| `metadata` | `check_if_column_exists` | |
-| `metadata` | `check_if_table_exists` | |
-| `metadata` | `check_if_unique_exists` | |
-| `metadata` | `check_if_data_value_exists` | |
-| `metadata` | `check_if_dates_exists` | |
-| `metadata` | `check_if_stats_exists` | |
-| `metadata` | `delete_from_columns` | |
-| `metadata` | `delete_from_tables` | |
-| `metadata` | `delete_from_uniques` | |
-| `metadata` | `delete_from_data_values` | |
-| `metadata` | `delete_from_dates` | |
-| `metadata` | `delete_from_stats` | |
-| `metadata` | `update_tables` | |
-| `metadata` | `get_tables` | |
-| `metadata` | `get_columns` | |
-| `metadata` | `get_distinct_values` | |
-| `metadata` | `get_date_columns` | |
-| `metadata` | `get_numeric_columns` | |
-| `metadata` | `update_percentiles` | |
+A connection definition for a SQLite3 database has only three properties:
+
+```CONF
+[<SQLITE3-REFERENCE-NAME>]
+db_engine = sqlite3
+schema = <SQLITE3-DATABASE-NAME>
+folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
+```
+
+3. To explore a database you need to run the following command from the terminal 
+in the `src/aeda` folder:
+
+```
+python aeda_.py explore my-source-database my-metadata-database
+```
+
+Where `my-source-database` and `my-metadata-database` are sections in the 
+`databases.ini` configuration file.
+
+4. Relax and wait for the results.
+
+5. You can query the resulting database or use a minimalistic user interface 
+develped with streamlit from the `src/aeda/streamlit` folder. It will publish the 
+report in the port `5000` of your `localhost`.
+
+```
+streamlit run aeda_app.py
+```
+
+
+## Feedback is appreciated!
+
+- Any questions or feedback? just create an [issue](https://github.com/darenasc/aeda/issues)
+- There are issues with `help wanted` to test commercial databases.

@@ -1,3 +1,7 @@
+# Databases using Docker
+
+This documentation shows how to create different test databases using Docker.
+
 # MySQL test database
 
 From the terminal you run the following command to create a container with MySQL 8.0
@@ -98,4 +102,20 @@ docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MySt
 # Copying and creating the metadata database
 docker cp src/aeda/sql_scripts/mssqlserver/mssqlserver.sql sqlserver:/tmp
 docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P MyStrongPasswordForSQLServer2019! -i /tmp/mssqlserver.sql
+```
+
+# Connections
+
+Connections are declared in `databases.ini`.
+
+```
+[<REFERENCE-NAME>]
+db_engine = <DB-ENGINE>
+host = <HOST>
+schema = <SCHEMA>
+catalog = <CATALOG>
+user = <USER>
+password = <PASSWORD>
+port = <PORT>
+encoding = <>
 ```
