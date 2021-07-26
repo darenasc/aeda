@@ -9,8 +9,14 @@ using a reading access connection to the database. The results of the profiling
 will be stored to a second [supported database](docs/supported_databases.md) 
 that you need write priviledges.
 
+Profiling a database means **metadata extraction** from all the tables of a given 
+database and storing this information into a second metadata database that can 
+be used to query information about the source database. The metadata database 
+is a **data catalog**.
+
 **AEDA** generates SQL queries to be executed in the source database and 
-store the results in a metadata database.
+store the results in a metadata database. The structure of the metadata database 
+can be found in this [document](docs/sql_code.md).
 
 ## Usage
 
