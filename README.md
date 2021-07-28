@@ -20,7 +20,9 @@ can be found in this [document](docs/sql_code.md).
 
 ## Usage
 
-0. Download or clone this repository.
+0. Download or clone this repository and install the dependencies.
+
+    `pipenv install Pipfile`
 
 1. Create a `databases.ini` file that can be a copy of 
 [`databases_template.ini`](src/aeda/connection_strings/databases_template.ini) 
@@ -37,7 +39,7 @@ db_engine = <A-SUPPORTED-DB-ENGINE>
 host = <IP-OR-HOSTNAME-SOURCE-DATABASE>
 database = <SOURCE-DATABASE-NAME>
 user = <SOURCE-USER>
-pass = <SOURCE-PASSWORD>
+password = <SOURCE-PASSWORD>
 port = <SOURCE-PORT>
 
 [my-metadata-database]
@@ -45,7 +47,7 @@ db_engine = <A-SUPPORTED-DB-ENGINE>
 host = <IP-OR-HOSTNAME-METADATA-DATABASE>
 database = <METADATA-DATABASE-NAME>
 user = <METADATA-USER>
-pass = <METADATA-PASSWORD>
+password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
 ```
 
