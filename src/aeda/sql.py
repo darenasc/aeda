@@ -5,7 +5,7 @@ import sqlite3
 from pymysql.cursors import Cursor
 from tqdm import tqdm
 
-from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
+from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS, MAX_LENGTH_VALUES
 import utils as _utils
 
 
@@ -750,6 +750,8 @@ def insert_or_update_data_values(
             data = []
             for i, data_value in enumerate(data_value_rows):
                 value, num_rows = data_value
+                if len(value) > MAX_LENGTH_VALUES:
+                    continue
                 data.append(
                     (
                         server_name,
