@@ -750,7 +750,7 @@ def insert_or_update_data_values(
             data = []
             for i, data_value in enumerate(data_value_rows):
                 value, num_rows = data_value
-                if len(value) > MAX_LENGTH_VALUES:
+                if len(str(value)) > MAX_LENGTH_VALUES:
                     continue
                 data.append(
                     (
