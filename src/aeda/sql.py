@@ -86,7 +86,7 @@ def insert_into_table():
 
 def get_chunks(data: list, n: int = 5_000):
     for i in range(0, len(data), n):
-        yield data[i:i + n]
+        yield data[i : i + n]
 
 
 def insert_or_update_columns(
@@ -96,10 +96,11 @@ def insert_or_update_columns(
     Parameters:
         db_engine_source (str): Section in the .ini file with databases connection parameters.
 
-        db_engine_metadata (str): 
+        db_engine_metadata (str):
 
         overwrite (bool) = True
     """
+
     def check_if_column_exists(
         db_engine_metadata,
         server_name,
@@ -145,7 +146,6 @@ def insert_or_update_columns(
         conn.close()
         return
 
-
     def insert_many_into_columns(db_engine_metadata, data):
         conn_string = _utils.get_db_connection_string(db_engine_metadata)
         conn = _utils.get_db_connection(conn_string)
@@ -177,7 +177,7 @@ def insert_or_update_columns(
             ordinal_position,
             data_type,
         ) = row
-        
+
         pbar.set_description("Columns: {}.{}".format(table_name, column_name))
         if overwrite and check_if_column_exists(
             db_engine_metadata,
@@ -196,13 +196,17 @@ def insert_or_update_columns(
                 column_name,
             )
 
-            data.append((server_name,
+            data.append(
+                (
+                    server_name,
                     table_catalog,
                     table_schema,
                     table_name,
                     column_name,
                     ordinal_position,
-                    data_type))
+                    data_type,
+                )
+            )
     insert_many_into_columns(db_engine_metadata, data)
     #         cursor.execute(
     #             query,

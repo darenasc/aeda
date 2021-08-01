@@ -8,6 +8,7 @@ import mariadb
 import pymysql
 import psycopg2
 import pyodbc
+
 # import snowflake.connector
 import sqlite3
 from termcolor import colored
@@ -37,7 +38,9 @@ def get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict:
     return db
 
 
-def get_connection_parameters(db_conf: str, filename: Path = CONFIG_DB) -> Union[str, str, str, str]:
+def get_connection_parameters(
+    db_conf: str, filename: Path = CONFIG_DB
+) -> Union[str, str, str, str]:
     connection_string = get_db_connection_string(db_conf, filename=filename)
     db_engine = connection_string["db_engine"]
     server_name = connection_string["host"]
