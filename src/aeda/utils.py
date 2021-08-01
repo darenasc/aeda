@@ -12,16 +12,16 @@ import pyodbc
 import sqlite3
 from termcolor import colored
 
-from config import CONFIG_DB, SQL_SCRIPTS
+from aeda.config import CONFIG_DB, SQL_SCRIPTS
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
-def get_db_connection_string(db_conf: str) -> dict:
+def get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict:
     parser = ConfigParser()
-    filename = CONFIG_DB
+    # filename = CONFIG_DB
     parser.read(filename)
 
     db = {}
@@ -37,8 +37,8 @@ def get_db_connection_string(db_conf: str) -> dict:
     return db
 
 
-def get_connection_parameters(db_conf: str) -> Union[str, str, str, str]:
-    connection_string = get_db_connection_string(db_conf)
+def get_connection_parameters(db_conf: str, filename: Path = CONFIG_DB) -> Union[str, str, str, str]:
+    connection_string = get_db_connection_string(db_conf, filename=filename)
     db_engine = connection_string["db_engine"]
     server_name = connection_string["host"]
     catalog_name = connection_string["catalog"]

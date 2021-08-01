@@ -2,11 +2,10 @@ import logging
 from pathlib import Path
 
 import sqlite3
-from pymysql.cursors import Cursor
 from tqdm import tqdm
 
-from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS, MAX_LENGTH_VALUES
-import utils as _utils
+from aeda.config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS, MAX_LENGTH_VALUES
+from aeda import utils as _utils
 
 
 FORMAT = "%(asctime)-15s %(message)s"
