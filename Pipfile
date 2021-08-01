@@ -20,6 +20,7 @@ tqdm = "*"
 termcolor = "*"
 mariadb = "*"
 snowflake-connector-python = "*"
+setuptools = "*"
 
 [requires]
 python_version = "3.8"
