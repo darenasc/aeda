@@ -569,6 +569,22 @@ def insert_or_update_data_values(
         threshold (int): [Optional] Maximum value of unique values to compute the frequency.
     """
 
+    def get_data_values_columns(
+        db_engine_metadata, server_name, catalog_name, schema_name, table_name
+    ):
+        """
+        Returns column_name, ORDINAL_POSITION and DATA_TYPE
+        """
+        conn_string = _utils.get_db_connection_string(db_engine_metadata)
+        query = SQL_SCRIPTS["get_data_values_columns"][conn_string["db_engine"]]
+        conn = _utils.get_db_connection(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return rows
+
     def check_if_data_value_exists(
         db_engine_metadata,
         server_name,
@@ -708,7 +724,7 @@ def insert_or_update_data_values(
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
         pbar.set_description("Data values - {}".format(table_name))
-        column_rows = get_columns_from_metadata(
+        column_rows = get_data_values_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
         pbar1 = tqdm(column_rows, leave=False)

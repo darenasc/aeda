@@ -39,6 +39,7 @@ DATA_TYPES = {
         "smallint",
         "real",
     ],
+    "filter_types": ["text", "ntext", "image", "blob", "binary", "varbinary", "jsonb"],
 }
 
 # MAX_LENGTH_VALUES is the length of the `data_values.data_value` column.
@@ -258,6 +259,26 @@ SQL_SCRIPTS = {
         "postgres": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mssqlserver": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mariadb": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
+    },
+    "get_data_values_columns": {
+        "mysql": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
+        "postgres": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
+        "snowflake": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
+        "sqlite3": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
+        "mssqlserver": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
+        "mariadb": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
     },
     "get_date_columns": {
         "mysql": """select server_name , table_catalog , table_schema , table_name , column_name from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) IN ({});""".format(
