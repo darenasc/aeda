@@ -4,10 +4,10 @@
 ![](https://img.shields.io/github/last-commit/darenasc/aeda)
 ![](https://img.shields.io/github/stars/darenasc/aeda?style=social)
 
-**AEDA** is a library to automatically profile any [supported database](docs/supported_databases.md) 
-using a reading access connection to the database. The results of the profiling 
-will be stored to a second [supported database](docs/supported_databases.md) 
-that you need write priviledges.
+**AEDA** will automatically profile any [supported database](docs/supported_databases.md) 
+using reading access priviledges. The results of the profiling 
+will be stored in a second [supported database](docs/supported_databases.md) 
+with write priviledges.
 
 Profiling a database means **metadata extraction** from all the tables of a given 
 database and storing this information into a second metadata database that can 
@@ -50,6 +50,8 @@ user = <METADATA-USER>
 password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
 ```
+
+> Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
 
 The supported database engines, to fill the `db_engine` property in the `databases.ini` 
 file are:

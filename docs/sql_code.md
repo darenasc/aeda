@@ -151,6 +151,7 @@ engine as `source` or as `metatada`.
 | `metadata` | `get_tables` | |
 | `metadata` | `get_columns` | |
 | `metadata` | `get_distinct_values` | |
+| `metadata` | `get_data_values_columns` | |
 | `metadata` | `get_date_columns` | |
 | `metadata` | `get_numeric_columns` | |
 | `metadata` | `update_percentiles` | |
