@@ -39,7 +39,19 @@ DATA_TYPES = {
         "smallint",
         "real",
     ],
-    "filter_types": ["text", "ntext", "image", "blob", "binary", "varbinary", "jsonb"],
+    "filter_types": [
+        "text",
+        "ntext",
+        "image",
+        "blob",
+        "binary",
+        "varbinary",
+        "jsonb",
+        "tsvector",
+        "array",
+        "bytea",
+        "regconfig",
+    ],
 }
 
 # MAX_LENGTH_VALUES is the length of the `data_values.data_value` column.
