@@ -1065,6 +1065,12 @@ def insert_or_update_stats(
         conn.close()
         return
 
+    def cast_to_float(value):
+        if value is None:
+            return None
+        else:
+            return float(value)
+
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
     pbar = tqdm(table_rows, desc="Stats")
     for table_row in pbar:
@@ -1119,18 +1125,18 @@ def insert_or_update_stats(
                 ) = percentile_rows
                 percentiles.append(
                     (
-                        float(p01),
-                        float(p025),
-                        float(p05),
-                        float(p10),
-                        float(q2),
-                        float(q3),
-                        float(q4),
-                        float(p90),
-                        float(p95),
-                        float(p975),
-                        float(p99),
-                        float(iqr),
+                        cast_to_float(p01),
+                        cast_to_float(p025),
+                        cast_to_float(p05),
+                        cast_to_float(p10),
+                        cast_to_float(q2),
+                        cast_to_float(q3),
+                        cast_to_float(q4),
+                        cast_to_float(p90),
+                        cast_to_float(p95),
+                        cast_to_float(p975),
+                        cast_to_float(p99),
+                        cast_to_float(iqr),
                         server_name,
                         catalog_name,
                         schema_name,
