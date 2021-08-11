@@ -31,9 +31,13 @@ def stats():
 st.title("Automated Exploratory Data Analysis app")
 
 config = _config.get_db_config()
+config_metadata = []
+for section in config.sections():
+    if 'metadata_database' in config[section]:
+        if config[section]['metadata_database'] == 'yes':
+            config_metadata.append(section)
 add_selectbox = st.sidebar.selectbox(
-    "What database would you like to connect?", tuple(config.sections())
-)
+    "What database would you like to connect?", tuple(config_metadata))
 
 if config[add_selectbox]["db_engine"] == "sqlite3":
     st.sidebar.write(

@@ -41,6 +41,7 @@ database = <SOURCE-DATABASE-NAME>
 user = <SOURCE-USER>
 password = <SOURCE-PASSWORD>
 port = <SOURCE-PORT>
+metadata_database = yes # yes or no optional parameter
 
 [my-metadata-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
@@ -52,6 +53,9 @@ port = <METADATA-PORT>
 ```
 
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
+
+The `metadata_database` parameter is optional. It is used by the streamlit app to 
+show the connection and presents the `metadata_database` as a dropdown list.
 
 The supported database engines, to fill the `db_engine` property in the `databases.ini` 
 file are:
