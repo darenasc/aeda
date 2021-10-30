@@ -37,7 +37,8 @@ stored.
 [my-source-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
 host = <IP-OR-HOSTNAME-SOURCE-DATABASE>
-database = <SOURCE-DATABASE-NAME>
+schema = <SCHEMA-SOURCE-DATABASE>
+catalog = <CATALOG-SOURCE-DATABASE>
 user = <SOURCE-USER>
 password = <SOURCE-PASSWORD>
 port = <SOURCE-PORT>
@@ -45,10 +46,12 @@ port = <SOURCE-PORT>
 [my-metadata-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
 host = <IP-OR-HOSTNAME-METADATA-DATABASE>
-database = <METADATA-DATABASE-NAME>
+schema = <SCHEMA-METADATA-DATABASE>
+catalog = <CATALOG-METADATA-DATABASE>
 user = <METADATA-USER>
 password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
+metadata_database = yes
 ```
 
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
