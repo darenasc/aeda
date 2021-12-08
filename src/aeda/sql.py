@@ -717,13 +717,16 @@ def insert_or_update_data_values(
         row = cursor.fetchone()
         cursor.close()
         conn.close()
-        return row[0]
+        if row:
+            return row[0]
+        else:
+            return -1
 
     table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
     pbar = tqdm(table_rows, desc="Data values")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-        pbar.set_description("Data values - {}".format(table_name))
+        pbar.set_description("Data values - {} ({:,})".format(table_name, n_rows))
         column_rows = get_data_values_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
@@ -739,7 +742,7 @@ def insert_or_update_data_values(
                 table_name,
                 column_name,
             )
-            if num_uniques > threshold:
+            if num_uniques > threshold or num_uniques > 0:
                 # logger.info(
                 #     "{}.{}.{} has {} unique values, more than the threshold {}".format(
                 #         table_name, column_name, value, num_uniques, threshold
@@ -934,11 +937,11 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
                         int(frequency),
                     )
                 )
-            logger.info(
-                "Inserting {} records into `dates` for {}.{}.{}".format(
-                    len(data), table_name, column_name, date_value
-                )
-            )
+            # logger.info(
+            #     "Inserting {} records into `dates` for {}.{}.{}".format(
+            #         len(data), table_name, column_name, date_value
+            #     )
+            # )
             insert_many_into_dates(db_engine_metadata, data)
 
 

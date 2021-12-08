@@ -71,3 +71,13 @@ CREATE TABLE IF NOT EXISTS stats (SERVER_NAME TEXT
       , P99 FLOAT
       , IQR FLOAT
       , PRIMARY KEY (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME));
+
+CREATE VIEW IF NOT EXISTS servers AS 
+select      server_name
+            , table_catalog 
+            , table_schema 
+            , count(distinct table_name) as n_tables
+            , sum(n_columns) as n_columns 
+            , sum(n_rows) as n_rows 
+from tables
+group by server_name, table_catalog , table_schema;

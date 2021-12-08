@@ -337,9 +337,9 @@ SQL_SCRIPTS = {
                     , count(*) as N
                     from {1}.{2}
                     group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
-        "mssqlserver": """SELECT DATEFROMPARTS(YEAR({0}), MONTH({0}), 1) as date, count(*) as N 
+        "mssqlserver": """SELECT DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1) as date, count(*) as N 
                     FROM {1}.{2}
-                    GROUP BY DATEFROMPARTS(YEAR({0}), MONTH({0}), 1)
+                    GROUP BY DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1)
                     ORDER BY N DESC;""",
     },
     "get_basic_stats": {
@@ -359,13 +359,13 @@ SQL_SCRIPTS = {
                     , MIN("{0}") AS MIN_
                     , MAX("{0}") - MIN("{0}") as RANGE_
                     FROM {1}.{2};""",
-        "mssqlserver": """SELECT AVG("{0}") AS AVG_
-                    , STDEV("{0}") as STDEV_
-                    , VAR("{0}") as VAR_
-                    , SUM("{0}") as SUM_
-                    , MAX("{0}") AS MAX_
-                    , MIN("{0}") AS MIN_
-                    , MAX("{0}") - MIN("{0}") as RANGE_
+        "mssqlserver": """SELECT AVG(CAST("{0}" AS FLOAT)) AS AVG_
+                    , STDEV(CAST("{0}" AS FLOAT)) as STDEV_
+                    , VAR(CAST("{0}" AS FLOAT)) as VAR_
+                    , SUM(CAST("{0}" AS FLOAT)) as SUM_
+                    , MAX(CAST("{0}" AS FLOAT)) AS MAX_
+                    , MIN(CAST("{0}" AS FLOAT)) AS MIN_
+                    , MAX(CAST("{0}" AS FLOAT)) - MIN(CAST("{0}" AS FLOAT)) as RANGE_
                     FROM {1}.{2};""",
         "mariadb": """SELECT CAST(AVG(`{0}`) as FLOAT) AS AVG_
                     , CAST(STD(`{0}`) as FLOAT) as STDEV_
