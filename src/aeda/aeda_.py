@@ -67,6 +67,9 @@ def explore(source: str, metadata: str, level: str = "server"):
             db_engine_source, db_engine_metadata, with_percentiles=True
         )
 
+    _utils.get_quote()
+    print("Done!")
+
     return
 
 
