@@ -131,7 +131,6 @@ dmypy.json
 .vscode/
 
 # Pipenv
-Pipfile.lock
 src/aeda/connection_strings/databases.ini
 archive_code/*
 sqlite3-dbs/*

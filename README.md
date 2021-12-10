@@ -4,34 +4,43 @@
 ![](https://img.shields.io/github/last-commit/darenasc/aeda)
 ![](https://img.shields.io/github/stars/darenasc/aeda?style=social)
 
-**AEDA** will automatically profile any [supported database](docs/supported_databases.md) 
-using reading access priviledges. The results of the profiling 
-will be stored in a second [supported database](docs/supported_databases.md) 
-with write priviledges.
+**AEDA** will automatically profile any [supported database](docs/supported_databases.md) using reading access priviledges. The results of the profiling will be stored in a second [supported database](docs/supported_databases.md) with write priviledges.
 
-Profiling a database means **metadata extraction** from all the tables of a given 
-database and storing this information into a second metadata database that can 
-be used to query information about the source database. The metadata database 
-is a **data catalog**.
+Profiling a database means **metadata extraction** from all the tables of a given database and storing this information into a second metadata database that can be used to query information about the source database. The metadata database is a **data catalog**.
 
 **AEDA** generates SQL queries to be executed in the source database and 
-store the results in a metadata database. The structure of the metadata database 
-can be found in this [document](docs/sql_code.md).
+store the results in a metadata database. The structure of the metadata database can be found in this [document](docs/sql_code.md).
 
 ## Usage
 
-0. Download or clone this repository and install the dependencies.
+### 1. Clone and install the repository
 
-    `pipenv install Pipfile`
+Download or clone this repository and install the dependencies.
 
-1. Create a `databases.ini` file that can be a copy of 
-[`databases_template.ini`](src/aeda/connection_strings/databases_template.ini) 
-and just rename it. 
+```bash
+git clone git@github.com:darenasc/aeda.git
+cd aeda
+```
 
-2. Add two database connection descriptions. One for the `source database` 
-(the database you want to run the profiling, with reading priviledges) and one 
-for the `metadata database`, with writing priviledges, where the resutls will be 
-stored.
+If you don't have pipenv installed, you can install it with:
+
+```bash
+pip install pipenv
+```
+
+Then, you can install the dependencies with:
+
+```bash
+pipenv install Pipfile
+```
+
+### 2. Create a database connection file
+
+`aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` folder to store the connections to databases. You can rename the [`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) file that is included with the repo and then add your connections. The `databases.ini` file is not syncronised with the repo.
+
+### 3. Add database connections
+
+The database connections have the following format. 
 
 ```CONF
 [my-source-database]
@@ -54,10 +63,16 @@ port = <METADATA-PORT>
 metadata_database = yes
 ```
 
+A **`[connection-name]`** in squared brackets that is used by `aeda` to identify what database you want to use. In the example above there are two database connections `[my-source-database]` and `[my-metadata-database]`.
+
+`[my-source-database]` is the database that we want to profile, we need reading priviledges to that database.
+`[my-metadata-database]` is the database where we will store the metadata from `[my-source-database]`. The database defined by `[my-metadata-database]` requires writing priviledges.
+
+You can check the [SQL Code](sql_code.md) documentation file to learn about the database structure of the metadata database and what metadata is extracted from the profiled sources.
+
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
 
-The supported database engines, to fill the `db_engine` property in the `databases.ini` 
-file are:
+The supported database engines, to fill the `db_engine` property in the `databases.ini` file are:
 
 * [x] `sqlite3`
 * [x] `mysql`
@@ -66,12 +81,12 @@ file are:
 * [x] `mariadb`
 * [x] `snowflake`
 
-You could create a SQLite3 local database or create metadata databases using `MySQL`, 
-`PostgreSQL`, or `MS SQL Server`. Using the following commands from the terminal 
-in the `src/aeda` folder:
+#### 3.1 Create the metadata database
 
-```
-python aeda_.py create_db sqlite3 # Creates a sqlite3 database by default, or
+You could create a SQLite3 local database or create metadata databases using `MySQL`, `PostgreSQL`, or `MS SQL Server`. Using the following commands from the terminal in the `src/aeda` folder:
+
+```shell
+python aeda_.py create_db sqlite3   # Creates a sqlite3 database by default, or
 python aeda_.py create_db mysql --section <YOUR-MYSQL-DATABASE>
 ```
 
@@ -84,26 +99,39 @@ schema = <SQLITE3-DATABASE-NAME>
 folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
 ```
 
-3. To explore a database you need to run the following command from the terminal 
-in the `src/aeda` folder:
+### 4. Exploring the source database
 
-```
+To explore a database you need to run the following command from the terminal in the `src/aeda` folder:
+
+```bash
+cd src/aeda
 python aeda_.py explore my-source-database my-metadata-database
 ```
 
-Where `my-source-database` and `my-metadata-database` are sections in the 
-`databases.ini` configuration file.
+Where `my-source-database` and `my-metadata-database` are the names of the connection definitions in the `databases.ini` configuration file.
 
-4. Relax and wait for the results.
+### 5. Relax and wait for the results.
 
-5. You can query the resulting database or use a minimalistic user interface 
-develped with streamlit from the `src/aeda/streamlit` folder. It will publish the 
-report in the port `5000` of your `localhost`.
+The process has 6 stages and will print `Done!` when the process is finished.
+
+The phases of the profiling are six:
+
+1. It's going to get all the columns from the metadata.
+2. It's going to compute number of columns and number of rows per table.
+3. It's going to compute the number of unique values and number of `NULL` values per column.
+4. It's going to compute the data value frequency per column.
+5. It's going to compute the monthly frequency of the timestamp or date type columns.
+6. It's going to compute statistics of the numeric type columns.
+
+The tables are processed by number of rows, so from step 3 it's going to process the tables with less rows first.
+
+### 6. Visualising the results
+
+You can query the resulting database or use a minimalistic user interface develped with streamlit from the `src/aeda/streamlit` folder. It will publish the report in the port `5000` of your `localhost`.
 
 ```
 streamlit run aeda_app.py
 ```
-
 
 ## Feedback is appreciated!
 
