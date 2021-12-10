@@ -22,7 +22,7 @@ git clone git@github.com:darenasc/aeda.git
 cd aeda
 ```
 
-If you don't have pipenv installed, you can install it with:
+If you don't have [pipenv](https://pipenv.pypa.io/en/latest/) installed, you can install it with:
 
 ```bash
 pip install pipenv
@@ -36,7 +36,7 @@ pipenv install Pipfile
 
 ### 2. Create a database connection file
 
-`aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` folder to store the connections to databases. You can rename the [`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) file that is included with the repo and then add your connections. The `databases.ini` file is not syncronised with the repo.
+`aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` folder to store the connections to databases. You can rename the [`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) file that is included with the repo and then add your connections there. The `databases.ini` file is not syncronised with the repo.
 
 ### 3. Add database connections
 
@@ -63,7 +63,7 @@ port = <METADATA-PORT>
 metadata_database = yes
 ```
 
-A **`[connection-name]`** in squared brackets that is used by `aeda` to identify what database you want to use. In the example above there are two database connections `[my-source-database]` and `[my-metadata-database]`.
+A **`[connection-name]`** in square brackets that is used by `aeda` to identify what database you want to use. In the example above there are two database connections `[my-source-database]` and `[my-metadata-database]`.
 
 `[my-source-database]` is the database that we want to profile, we need reading priviledges to that database.
 `[my-metadata-database]` is the database where we will store the metadata from `[my-source-database]`. The database defined by `[my-metadata-database]` requires writing priviledges.
@@ -127,9 +127,10 @@ The tables are processed by number of rows, so from step 3 it's going to process
 
 ### 6. Visualising the results
 
-You can query the resulting database or use a minimalistic user interface develped with streamlit from the `src/aeda/streamlit` folder. It will publish the report in the port `5000` of your `localhost`.
+You can query the resulting database or use a minimalistic user interface develped with [streamlit](https://streamlit.io) from the `src/aeda/streamlit` folder. It will publish the report in the port `5000` of your `localhost`.
 
 ```
+cd src/aeda/streamlit
 streamlit run aeda_app.py
 ```
 
