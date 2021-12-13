@@ -51,6 +51,7 @@ catalog = <CATALOG-SOURCE-DATABASE>
 user = <SOURCE-USER>
 password = <SOURCE-PASSWORD>
 port = <SOURCE-PORT>
+metadata_database = yes # yes or no optional parameter
 
 [my-metadata-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
@@ -72,7 +73,11 @@ You can check the [SQL Code](docs/sql_code.md) documentation file to learn about
 
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
 
-The supported database engines, to fill the `db_engine` property in the `databases.ini` file are:
+The `metadata_database` parameter is optional. It is used by the streamlit app to 
+show the connection and presents the `metadata_database` as a dropdown list.
+
+The supported database engines, to fill the `db_engine` property in the `databases.ini` 
+file are:
 
 * [x] `sqlite3`
 * [x] `mysql`
