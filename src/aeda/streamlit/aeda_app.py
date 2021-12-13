@@ -28,6 +28,8 @@ def stats():
     df_stats
 
 
+
+
 st.title("Automated Exploratory Data Analysis app")
 
 config = _config.get_db_config()
@@ -59,11 +61,26 @@ Schema: `{}`""".format(
         )
     )
 
+
 apps = {"Data values": data_values, "Dates": dates, "Stats": stats}
 app = st.sidebar.selectbox("Choice your page: ", tuple(apps.keys()))
 
 connection_string = _config.get_db_connection_string(add_selectbox)
 conn = _config.get_db_connection(connection_string)
+
+query_metrics = """select count(distinct server_name) as n 
+                        , count(distinct table_catalog) as databases
+                        , sum(n_tables) as tables
+                        , sum(n_rows) as rows
+                        , sum(n_columns) as n_columns
+                    from servers;"""
+df_metrics = pd.read_sql(query_metrics, conn)
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Servers", int(df_metrics.n.values[0]))
+col2.metric("Tables", int(df_metrics.tables.values[0]))
+col3.metric("Columns", int(df_metrics.n_columns.values[0]))
+col4.metric("Records", int(df_metrics.rows.values[0]))
+
 
 st.subheader("Servers")
 query_servers = """select * from servers;"""
