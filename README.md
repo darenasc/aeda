@@ -18,7 +18,7 @@ store the results in a metadata database. The structure of the metadata database
 Download or clone this repository and install the dependencies.
 
 ```bash
-git clone git@github.com:darenasc/aeda.git
+git clone https://github.com/darenasc/aeda.git
 cd aeda
 ```
 
