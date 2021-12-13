@@ -742,7 +742,7 @@ def insert_or_update_data_values(
                 table_name,
                 column_name,
             )
-            if num_uniques > threshold or num_uniques > 0:
+            if num_uniques > threshold or num_uniques < 0:
                 # logger.info(
                 #     "{}.{}.{} has {} unique values, more than the threshold {}".format(
                 #         table_name, column_name, value, num_uniques, threshold

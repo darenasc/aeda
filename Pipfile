@@ -21,6 +21,7 @@ termcolor = "*"
 mariadb = "*"
 snowflake-connector-python = "*"
 setuptools = "*"
+aeda = {editable = true, path = "."}
 
 [requires]
 python_version = "3.8"
