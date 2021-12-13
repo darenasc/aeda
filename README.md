@@ -18,7 +18,7 @@ store the results in a metadata database. The structure of the metadata database
 Download or clone this repository and install the dependencies.
 
 ```bash
-git clone git@github.com:darenasc/aeda.git
+git clone https://github.com/darenasc/aeda.git
 cd aeda
 ```
 
@@ -68,7 +68,7 @@ A **`[connection-name]`** in square brackets that is used by `aeda` to identify 
 `[my-source-database]` is the database that we want to profile, we need reading priviledges to that database.
 `[my-metadata-database]` is the database where we will store the metadata from `[my-source-database]`. The database defined by `[my-metadata-database]` requires writing priviledges.
 
-You can check the [SQL Code](sql_code.md) documentation file to learn about the database structure of the metadata database and what metadata is extracted from the profiled sources.
+You can check the [SQL Code](docs/sql_code.md) documentation file to learn about the database structure of the metadata database and what metadata is extracted from the profiled sources.
 
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
 
