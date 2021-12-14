@@ -75,11 +75,12 @@ query_metrics = """select count(distinct server_name) as n
                         , sum(n_columns) as n_columns
                     from servers;"""
 df_metrics = pd.read_sql(query_metrics, conn)
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Servers", int(df_metrics.n.values[0]))
-col2.metric("Tables", int(df_metrics.tables.values[0]))
-col3.metric("Columns", int(df_metrics.n_columns.values[0]))
-col4.metric("Records", int(df_metrics.rows.values[0]))
+col2.metric("Databases", int(df_metrics.databases.values[0]))
+col3.metric("Tables", int(df_metrics.tables.values[0]))
+col4.metric("Columns", int(df_metrics.n_columns.values[0]))
+col5.metric("Records", "{:,}".format(int(df_metrics.rows.values[0])))
 
 
 st.subheader("Servers")
