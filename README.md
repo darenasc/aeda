@@ -104,6 +104,24 @@ schema = <SQLITE3-DATABASE-NAME>
 folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
 ```
 
+#### 3.2 Test the connections
+
+To test the connections to the databases you have created, you can use the following command:
+
+```bash
+cd src/aeda
+python aeda_.py test-connections my-source-database my-metadata-database
+```
+
+Where `my-source-database` and `my-metadata-database` are the names of the connection definitions in the `databases.ini` configuration file.
+
+This should print the following:
+
+```
+[ OK ]  Connection to the *.*.*.*.BikeStores.sales source tested successfully...
+[ OK ]  Connection to the *.*.*.*.def.world source tested successfully...
+```
+
 ### 4. Exploring the source database
 
 To explore a database you need to run the following command from the terminal in the `src/aeda` folder:
