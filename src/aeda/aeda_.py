@@ -73,6 +73,18 @@ def explore(source: str, metadata: str, level: str = "server"):
     return
 
 
+@app.command()
+def test_connections(source: str, metadata: str):
+
+    db_engine_source = source
+    db_engine_metadata = metadata
+    conn_string_source = _utils.get_db_connection_string(db_engine_source)
+    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+
+    _utils.check_database_connections(conn_string_source, conn_string_metadata)
+
+    return
+
 def load():
     pass
 
