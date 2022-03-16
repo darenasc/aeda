@@ -167,9 +167,3 @@ def check_database_connections(conn_string_source, conn_string_metadata):
     check_database_connection(conn_string_source)
     check_database_connection(conn_string_metadata)
     return
-
-
-def get_quote():
-    url_affirmations = "https://www.affirmations.dev"
-    message = requests.get(url_affirmations).json()
-    print(message["affirmation"])

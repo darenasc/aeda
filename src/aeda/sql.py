@@ -1155,13 +1155,13 @@ def insert_or_update_stats(
                     schema_name,
                     table_name,
                     column_name,
-                    float(avg_),
-                    float(stdev_),
-                    float(var_),
-                    float(sum_),
-                    float(max_),
-                    float(min_),
-                    float(range_),
+                    cast_to_float(avg_),
+                    cast_to_float(stdev_),
+                    cast_to_float(var_),
+                    cast_to_float(sum_),
+                    cast_to_float(max_),
+                    cast_to_float(min_),
+                    cast_to_float(range_),
                 )
             )
         if len(data) > 0:
