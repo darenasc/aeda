@@ -21,6 +21,7 @@ aeda = {editable = true, path = "."}
 black = "*"
 pytest = "*"
 isort = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.10"

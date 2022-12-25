@@ -4,12 +4,19 @@
 ![](https://img.shields.io/github/last-commit/darenasc/aeda)
 ![](https://img.shields.io/github/stars/darenasc/aeda?style=social)
 
-**AEDA** will automatically profile any [supported database](docs/supported_databases.md) using reading access priviledges. The results of the profiling will be stored in a second [supported database](docs/supported_databases.md) with write priviledges.
+**AEDA** will automatically profile any [supported database](docs/supported_databases.md) 
+using reading access priviledges. The results of the profiling will be stored 
+in a second [supported database](docs/supported_databases.md) with write 
+priviledges.
 
-Profiling a database means **metadata extraction** from all the tables of a given database and storing this information into a second metadata database that can be used to query information about the source database. The metadata database is a **data catalog**.
+Profiling a database means **metadata extraction** from all the tables of a 
+given database and storing this information into a second metadata database 
+that can be used to query information about the source database. The metadata 
+database is a **data catalog**.
 
 **AEDA** generates SQL queries to be executed in the source database and 
-store the results in a metadata database. The structure of the metadata database can be found in this [document](docs/sql_code.md).
+store the results in a metadata database. The structure of the metadata 
+database can be found in this [document](docs/sql_code.md).
 
 ## Usage
 
@@ -22,7 +29,8 @@ git clone https://github.com/darenasc/aeda.git
 cd aeda
 ```
 
-If you don't have [pipenv](https://pipenv.pypa.io/en/latest/) installed, you can install it with:
+If you don't have [pipenv](https://pipenv.pypa.io/en/latest/) installed, you 
+can install it with:
 
 ```bash
 pip install pipenv
@@ -36,7 +44,11 @@ pipenv install Pipfile
 
 ### 2. Create a database connection file
 
-`aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` folder to store the connections to databases. You can rename the [`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) file that is included with the repo and then add your connections there. The `databases.ini` file is not syncronised with the repo.
+`aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` 
+folder to store the connections to databases. You can rename the 
+[`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) 
+file that is included with the repo and then add your connections there. 
+The `databases.ini` file is not syncronised with the repo.
 
 ### 3. Add database connections
 
@@ -64,12 +76,19 @@ port = <METADATA-PORT>
 metadata_database = yes
 ```
 
-A **`[connection-name]`** in square brackets that is used by `aeda` to identify what database you want to use. In the example above there are two database connections `[my-source-database]` and `[my-metadata-database]`.
+A **`[connection-name]`** in square brackets that is used by `aeda` to identify 
+what database you want to use. In the example above there are two database 
+connections `[my-source-database]` and `[my-metadata-database]`.
 
-`[my-source-database]` is the database that we want to profile, we need reading priviledges to that database.
-`[my-metadata-database]` is the database where we will store the metadata from `[my-source-database]`. The database defined by `[my-metadata-database]` requires writing priviledges.
+`[my-source-database]` is the database that we want to profile, we need reading 
+priviledges to that database.
+`[my-metadata-database]` is the database where we will store the metadata from 
+`[my-source-database]`. The database defined by `[my-metadata-database]` 
+requires writing priviledges.
 
-You can check the [SQL Code](docs/sql_code.md) documentation file to learn about the database structure of the metadata database and what metadata is extracted from the profiled sources.
+You can check the [SQL Code](docs/sql_code.md) documentation file to learn 
+about the database structure of the metadata database and what metadata is 
+extracted from the profiled sources.
 
 > Note: Do not use quotes in the `databases.ini` file and remove '<' and '>' chars.
 
@@ -88,7 +107,9 @@ file are:
 
 #### 3.1 Create the metadata database
 
-You could create a SQLite3 local database or create metadata databases using `MySQL`, `PostgreSQL`, or `MS SQL Server`. Using the following commands from the terminal in the `src/aeda` folder:
+You could create a SQLite3 local database or create metadata databases using 
+`MySQL`, `PostgreSQL`, or `MS SQL Server`. Using the following commands from 
+the terminal in the `src/aeda` folder:
 
 ```shell
 python aeda_.py create_db sqlite3   # Creates a sqlite3 database by default, or
@@ -106,14 +127,16 @@ folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
 
 #### 3.2 Test the connections
 
-To test the connections to the databases you have created, you can use the following command:
+To test the connections to the databases you have created, you can use the 
+following command:
 
 ```bash
 cd src/aeda
 python aeda_.py test-connections my-source-database my-metadata-database
 ```
 
-Where `my-source-database` and `my-metadata-database` are the names of the connection definitions in the `databases.ini` configuration file.
+Where `my-source-database` and `my-metadata-database` are the names of the 
+connection definitions in the `databases.ini` configuration file.
 
 This should print the following:
 
@@ -124,14 +147,16 @@ This should print the following:
 
 ### 4. Exploring the source database
 
-To explore a database you need to run the following command from the terminal in the `src/aeda` folder:
+To explore a database you need to run the following command from the terminal 
+in the `src/aeda` folder:
 
 ```bash
 cd src/aeda
 python aeda_.py explore my-source-database my-metadata-database
 ```
 
-Where `my-source-database` and `my-metadata-database` are the names of the connection definitions in the `databases.ini` configuration file.
+Where `my-source-database` and `my-metadata-database` are the names of the 
+connection definitions in the `databases.ini` configuration file.
 
 ### 5. Relax and wait for the results.
 
@@ -150,7 +175,9 @@ The tables are processed by number of rows, so from step 3 it's going to process
 
 ### 6. Visualising the results
 
-You can query the resulting database or use a minimalistic user interface develped with [streamlit](https://streamlit.io) from the `src/aeda/streamlit` folder. It will publish the report in the port `5000` of your `localhost`.
+You can query the resulting database or use a minimalistic user interface 
+develped with [streamlit](https://streamlit.io) from the `src/aeda/streamlit` 
+folder. It will publish the report in the port `5000` of your `localhost`.
 
 ```
 cd src/aeda/streamlit

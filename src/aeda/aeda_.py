@@ -1,13 +1,9 @@
 import logging
 
-import typer
-
-from config import (
-    EXPLORATION_LEVELS,
-    SUPPORTED_DB_ENGINES,
-)
 import sql as _sql
+import typer
 import utils as _utils
+from config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -84,6 +80,7 @@ def test_connections(source: str, metadata: str):
     _utils.check_database_connections(conn_string_source, conn_string_metadata)
 
     return
+
 
 def load():
     pass

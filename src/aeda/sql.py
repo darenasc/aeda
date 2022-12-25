@@ -1,12 +1,11 @@
 import logging
+import sqlite3
 from pathlib import Path
 
-import sqlite3
 from tqdm import tqdm
 
-from aeda.config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS, MAX_LENGTH_VALUES
 from aeda import utils as _utils
-
+from aeda.config import MAX_LENGTH_VALUES, SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -22,7 +21,7 @@ def create_database(section: str):
     conn_string = _utils.get_db_connection_string(section)
     conn = _utils.get_db_connection(conn_string)
 
-    logger.info("Creating a {} database".format(conn_string["db_engine"]))
+    logger.info(f"""Creating a {conn_string["db_engine"]} database""")
 
     if conn_string["db_engine"] in ["mysql", "postgres"]:
         with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
@@ -41,6 +40,8 @@ def create_database(section: str):
         dbname = str(conn_string["schema"] + ".db")
         if not Path(conn_string["folder"]).is_dir():
             Path(conn_string["folder"]).mkdir(parents=True)
+
+        logger.info(f"Creating database {dbname} in {conn_string['folder']}")
 
         conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
 
@@ -63,20 +64,24 @@ def create_database(section: str):
 
 
 def explore_server(server_name: str):
+    # TODO: Implement explore_server
     pass
 
 
 def explore_catalog(server_name: str, catalog_name: str):
+    # TODO: Implement explore_catalog
     pass
 
 
 def explore_schema(server_name: str, catalog_name: str, schema_name: str):
+    # TODO: Implement explore_schema
     pass
 
 
 def explore_table(
     server_name: str, catalog_name: str, schema_name: str, table_name: str
 ):
+    # TODO: Implement explore_table
     pass
 
 
@@ -524,7 +529,8 @@ def insert_or_update_uniques(
     pbar = tqdm(table_rows, desc="Uniques")
     for row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = row
-        pbar.set_description("Uniques - {}".format(table_name))
+        # pbar.set_description("Uniques - {}".format(table_name))
+        pbar.set_description(f"Uniques - {table_name} ({n_rows:,} rows)")
         if check_if_unique_exists(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         ):
@@ -896,7 +902,7 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
     pbar = tqdm(table_rows, desc="Dates")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-        pbar.set_description("Dates {}".format(table_name))
+        pbar.set_description(f"Dates - {table_name} ({n_rows:,} rows)")
         column_rows = get_date_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
@@ -1078,7 +1084,7 @@ def insert_or_update_stats(
     pbar = tqdm(table_rows, desc="Stats")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-        pbar.set_description("Stats - {}".format(table_name))
+        pbar.set_description(f"Stats - {table_name} ({n_rows:,} rows)")
         column_rows = get_numeric_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )

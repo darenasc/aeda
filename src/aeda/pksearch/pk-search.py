@@ -1,13 +1,12 @@
+import logging
 from itertools import combinations
-
-from tqdm import tqdm
-
-import aeda
 
 # from tqdm import tqdm_notebook as tqdm
 import pandas as pd
 from sqlalchemy import create_engine
-import logging
+from tqdm import tqdm
+
+import aeda
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(filename="pk-search.log", level=logging.INFO, format=FORMAT)

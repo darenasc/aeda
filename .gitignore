@@ -132,6 +132,7 @@ dmypy.json
 
 # Pipenv
 src/aeda/connection_strings/databases.ini
+src/aeda/metadata/*
 archive_code/*
 sqlite3-dbs/*
 docs/images/*

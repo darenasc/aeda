@@ -1,10 +1,8 @@
 import logging
 
 import pymysql
-
-from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 import utils as _utils
-
+from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
