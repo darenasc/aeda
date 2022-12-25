@@ -1,7 +1,8 @@
 from pathlib import Path
-from _pytest.config import filename_arg
-from aeda import utils
+
 import pytest
+
+from aeda import utils
 
 
 def test_get_db_connection_string():

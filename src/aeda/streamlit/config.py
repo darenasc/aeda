@@ -1,12 +1,12 @@
+import sqlite3
 from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
 
 import mariadb
+import psycopg2
 import pymysql
 import pyodbc
-import psycopg2
-import sqlite3
 
 AEDA_DIR = Path(__file__).parent.absolute().parent
 DB_CONNECTIONS = AEDA_DIR / "connection_strings" / "databases.ini"

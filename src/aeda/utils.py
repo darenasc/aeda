@@ -1,16 +1,15 @@
-from configparser import ConfigParser
 import logging
+import sqlite3
+from configparser import ConfigParser
 from pathlib import Path
-import requests
 from typing import Union
 
 import mariadb
-import pymysql
 import psycopg2
+import pymysql
 import pyodbc
-
-# import snowflake.connector
-import sqlite3
+import requests
+import snowflake.connector
 from termcolor import colored
 
 from aeda.config import CONFIG_DB, SQL_SCRIPTS
@@ -69,6 +68,18 @@ def get_db_connection(conn_string):
             logger.error("Database connection error")
             raise
     elif conn_string["db_engine"] in ["mysql"]:
+        try:
+            conn = pymysql.connect(
+                host=conn_string["host"],
+                user=conn_string["user"],
+                password=conn_string["password"],
+                database=conn_string["schema"],
+                port=int(conn_string["port"]),
+            )
+        except Exception:
+            logger.error("Database connection error")
+            raise
+    elif conn_string["db_engine"] in ["aurora"]:
         try:
             conn = pymysql.connect(
                 host=conn_string["host"],

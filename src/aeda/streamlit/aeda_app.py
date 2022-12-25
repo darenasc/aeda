@@ -1,10 +1,9 @@
 from pathlib import Path
 
+import config as _config
 import pandas as pd
 import streamlit as st
-
-from apps import data_values_app, stats_app, dates_app
-import config as _config
+from apps import data_values_app, dates_app, stats_app
 
 
 def data_values():
@@ -28,18 +27,17 @@ def stats():
     df_stats
 
 
-
-
 st.title("Automated Exploratory Data Analysis app")
 
 config = _config.get_db_config()
 config_metadata = []
 for section in config.sections():
-    if 'metadata_database' in config[section]:
-        if config[section]['metadata_database'] == 'yes':
+    if "metadata_database" in config[section]:
+        if config[section]["metadata_database"] == "yes":
             config_metadata.append(section)
 add_selectbox = st.sidebar.selectbox(
-    "What database would you like to connect?", tuple(config_metadata))
+    "What database would you like to connect?", tuple(config_metadata)
+)
 
 if config[add_selectbox]["db_engine"] == "sqlite3":
     st.sidebar.write(

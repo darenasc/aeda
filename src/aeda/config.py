@@ -1,5 +1,7 @@
 from pathlib import Path
 
+# TODO add support for aurora data base
+
 AEDA_DIR = Path(__file__).parent.absolute()
 
 SQLITE3_DB_DIR = AEDA_DIR / "metadata" / "aeda_metadata.db"
@@ -13,6 +15,7 @@ SUPPORTED_DB_ENGINES = [
     "mssqlserver",
     "mariadb",
     "snowflake",
+    "aurora",
 ]
 EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 
@@ -63,6 +66,7 @@ SQL_SCRIPTS = {
         "postgres": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
         "mssqlserver": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
         "mariadb": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
+        "aurora": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
     },
     "insert_into_columns": {
         "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (%s, %s, %s, %s, %s, %s, %s);""",
@@ -221,12 +225,14 @@ SQL_SCRIPTS = {
         "postgres": """SELECT %s AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "mssqlserver": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "mariadb": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
+        "aurora": """SELECT %s AS SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COUNT(*) AS N_COLUMNS, NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
     },
     "number_of_rows": {
-        "mysql": """select count(*) as n from {}.{}""",
+        "mysql": """select count(*) as n from `{}`.`{}`""",
         "postgres": """select count(*) as n from {}.{}""",
         "mssqlserver": """select count(*) as n from {}.{}""",
         "mariadb": """select count(*) as n from {}.{}""",
+        "aurora": """select count(*) as n from `{}`.`{}`""",
     },
     "update_tables": {
         "mysql": """UPDATE tables SET N_ROWS = %s WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s;""",
@@ -253,10 +259,11 @@ SQL_SCRIPTS = {
         "mariadb": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?;""",
     },
     "get_unique_count": {
-        "mysql": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM {1}.{2}""",
+        "mysql": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM `{1}`.`{2}`""",
         "postgres": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "mssqlserver": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "mariadb": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
+        "aurora": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM `{1}`.`{2}`""",
     },
     "get_distinct_values": {
         "mysql": """select DISTINCT_VALUES from uniques where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
@@ -265,12 +272,14 @@ SQL_SCRIPTS = {
         "sqlite3": """select DISTINCT_VALUES from uniques where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
         "mssqlserver": """select DISTINCT_VALUES from uniques where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
         "mariadb": """select DISTINCT_VALUES from uniques where SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?;""",
+        "aurora": """select DISTINCT_VALUES from uniques where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
     },
     "get_frequency": {
-        "mysql": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM {1}.{2} GROUP BY `{0}`;""",
+        "mysql": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM `{1}`.`{2}` GROUP BY `{0}`;""",
         "postgres": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mssqlserver": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mariadb": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
+        "aurora": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM `{1}`.`{2}` GROUP BY `{0}`;""",
     },
     "get_data_values_columns": {
         "mysql": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) NOT IN ({});""".format(
@@ -335,12 +344,16 @@ SQL_SCRIPTS = {
     "get_first_day_of_month": {
         "mysql": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
                     , count(*) as N
-                    from {1}.{2}
+                    from `{1}`.`{2}`
                     group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
         "mssqlserver": """SELECT DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1) as date, count(*) as N 
                     FROM {1}.{2}
                     GROUP BY DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1)
                     ORDER BY N DESC;""",
+        "aurora": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
+                    , count(*) as N
+                    from `{1}`.`{2}`
+                    group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
     },
     "get_basic_stats": {
         "mysql": """SELECT CAST(AVG(`{0}`) as FLOAT) AS AVG_
@@ -350,7 +363,15 @@ SQL_SCRIPTS = {
                     , CAST(MAX(`{0}`) as FLOAT) AS MAX_
                     , CAST(MIN(`{0}`) as FLOAT) AS MIN_
                     , CAST(MAX(`{0}`) - MIN(`{0}`) AS FLOAT) as RANGE_
-                    FROM {1}.{2};""",
+                    FROM `{1}`.`{2}`;""",
+        "aurora": """SELECT CAST(AVG(`{0}`) as decimal(10,2)) AS AVG_
+                    , CAST(STD(`{0}`) as decimal(10,2)) as STDEV_
+                    , CAST(VARIANCE(`{0}`) as decimal(10,2)) as VAR_
+                    , CAST(SUM(`{0}`) as decimal(10,2)) as SUM_
+                    , CAST(MAX(`{0}`) as decimal(10,2)) AS MAX_
+                    , CAST(MIN(`{0}`) as decimal(10,2)) AS MIN_
+                    , CAST(MAX(`{0}`) - MIN(`{0}`) AS decimal(10,2)) as RANGE_
+                    FROM `{1}`.`{2}`;""",
         "postgres": """SELECT AVG("{0}") AS AVG_
                     , stddev("{0}") as STDEV_
                     , VARIANCE("{0}") as VAR_
@@ -406,6 +427,20 @@ SQL_SCRIPTS = {
             , (select min(`{0}`) as P95 from cte1 where n_tile = 190) as t190
             , (select min(`{0}`) as P975 from cte1 where n_tile = 195) as t195
             , (select min(`{0}`) as P99 from cte1 where n_tile = 198) as t198;
+            """,
+        "aurora": """select distinct null as P01
+            , null as P025
+            , null as P05
+            , null as P10
+            , null as Q1
+            , null as Q2
+            , null as Q3
+            , null as P90
+            , null as P95
+            , null as P975
+            , null as P99
+            , null as IQR
+            from `{1}`.`{2}`;
             """,
         "postgres": """select percentile_disc(0.01) within group (order by "{0}") as P01
             , percentile_disc(0.025) within group (order by "{0}") as P025

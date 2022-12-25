@@ -1,6 +1,6 @@
 import logging
-from os import close
 import sqlite3
+from os import close
 from pathlib import Path
 
 from pymysql import cursors
