@@ -1,9 +1,10 @@
 from pathlib import Path
 
-import config as _config
 import pandas as pd
-import streamlit as st
 from apps import data_values_app, dates_app, stats_app
+
+import config as _config
+import streamlit as st
 
 
 def data_values():

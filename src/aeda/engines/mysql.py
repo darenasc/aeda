@@ -1,6 +1,7 @@
 import logging
 
 import pymysql
+
 import utils as _utils
 from config import SQL_CREATE_SCRIPTS, SQL_SCRIPTS
 

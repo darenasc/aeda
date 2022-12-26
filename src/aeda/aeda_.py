@@ -1,9 +1,11 @@
 import logging
+from datetime import datetime
 
-import sql as _sql
 import typer
-import utils as _utils
-from config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES
+
+from aeda import sql as _sql
+from aeda import utils as _utils
+from aeda.config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -28,7 +30,15 @@ def create_database(db_engine: str, section: str = None, overwrite: bool = False
 
 
 @app.command()
-def explore(source: str, metadata: str, level: str = "server"):
+def explore(
+    source: str,
+    metadata: str,
+    level: str = "server",
+    overwrite: bool = True,
+    threshold: int = 5_000,
+    min_n_rows: int = 0,
+    percentiles: bool = False,
+):
     """
     Parameters:
         db_engine (str):
@@ -51,17 +61,43 @@ def explore(source: str, metadata: str, level: str = "server"):
 
     _utils.check_database_connections(conn_string_source, conn_string_metadata)
 
+    start_time = datetime.now()
+
     if level == "server":
-        _sql.insert_or_update_columns(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_tables(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_uniques(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_data_values(db_engine_source, db_engine_metadata)
-        _sql.insert_or_update_dates(db_engine_source, db_engine_metadata)
+        _sql.insert_or_update_columns(
+            db_engine_source, db_engine_metadata, overwrite=overwrite
+        )
+        _sql.insert_or_update_tables(
+            db_engine_source, db_engine_metadata, overwrite=overwrite
+        )
+        _sql.insert_or_update_uniques(
+            db_engine_source,
+            db_engine_metadata,
+            overwrite=overwrite,
+            min_n_rows=min_n_rows,
+        )
+        _sql.insert_or_update_data_values(
+            db_engine_source,
+            db_engine_metadata,
+            overwrite=overwrite,
+            threshold=threshold,
+            min_n_rows=min_n_rows,
+        )
+        _sql.insert_or_update_dates(
+            db_engine_source,
+            db_engine_metadata,
+            overwrite=overwrite,
+            min_n_rows=min_n_rows,
+        )
         _sql.insert_or_update_stats(
-            db_engine_source, db_engine_metadata, with_percentiles=True
+            db_engine_source,
+            db_engine_metadata,
+            with_percentiles=percentiles,
+            min_n_rows=min_n_rows,
         )
 
-    print("Done!")
+    logger.info(f"Profiled in: {datetime.now() - start_time}")
+    logger.info("Done!")
 
     return
 

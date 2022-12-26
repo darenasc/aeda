@@ -341,16 +341,16 @@ def insert_or_update_tables(
             table_name,
         )
         pbar.set_description("Tables - {}".format(table_name))
-        if (
-            check_if_table_exists(
-                db_engine_metadata, server_name, catalog_name, schema_name, table_name
-            )
-            and overwrite
+        if check_if_table_exists(
+            db_engine_metadata, server_name, catalog_name, schema_name, table_name
         ):
-            cursor.execute(
-                query_delete, (server_name, catalog_name, schema_name, table_name)
-            )
-            conn.commit()
+            if overwrite:
+                cursor.execute(
+                    query_delete, (server_name, catalog_name, schema_name, table_name)
+                )
+                conn.commit()
+            elif not overwrite:
+                continue
         cursor.execute(
             query_insert,
             (server_name, catalog_name, schema_name, table_name, n_columns, n_rows),
@@ -375,7 +375,7 @@ def get_uniques(db_engine_source, db_engine_metadata):
 
 
 def get_tables_from_metadata(
-    db_engine_source: str, db_engine_metadata: str, n_rows: int = 0
+    db_engine_source: str, db_engine_metadata: str, min_n_rows: int = 0
 ):
     """
     Returns SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME and N_ROWS
@@ -390,7 +390,7 @@ def get_tables_from_metadata(
     conn = _utils.get_db_connection(conn_string_metadata)
     cursor = conn.cursor()
 
-    cursor.execute(query.format(n_rows), (server_name, catalog_name, schema_name))
+    cursor.execute(query.format(min_n_rows), (server_name, catalog_name, schema_name))
 
     rows = cursor.fetchall()
 
@@ -418,7 +418,10 @@ def get_columns_from_metadata(
 
 
 def insert_or_update_uniques(
-    db_engine_source: str, db_engine_metadata: str, overwrite: bool = True
+    db_engine_source: str,
+    db_engine_metadata: str,
+    overwrite: bool = True,
+    min_n_rows: int = 0,
 ):
     """
     Parameters:
@@ -428,7 +431,7 @@ def insert_or_update_uniques(
 
         overwrite (bool): (Optional)
     """
-
+    # TODO - add overwrite
     def get_unique_values(db_engine_source: str, table_name: str, column_name: str):
         """
         Returns `count_distinct` and `count_null`
@@ -523,7 +526,9 @@ def insert_or_update_uniques(
         db_engine_source
     )
 
-    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    table_rows = get_tables_from_metadata(
+        db_engine_source, db_engine_metadata, min_n_rows=min_n_rows
+    )
 
     # logger.info("{} tables counting unique and null values".format(len(table_rows)))
     pbar = tqdm(table_rows, desc="Uniques")
@@ -534,9 +539,16 @@ def insert_or_update_uniques(
         if check_if_unique_exists(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         ):
-            delete_from_uniques(
-                db_engine_metadata, server_name, catalog_name, schema_name, table_name
-            )
+            if overwrite:
+                delete_from_uniques(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                )
+            else:
+                continue
         column_rows = get_columns_from_metadata(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
@@ -564,7 +576,11 @@ def insert_or_update_uniques(
 
 
 def insert_or_update_data_values(
-    db_engine_source: str, db_engine_metadata: str, threshold: int = 5_000
+    db_engine_source: str,
+    db_engine_metadata: str,
+    overwrite: bool = False,
+    threshold: int = 5_000,
+    min_n_rows: int = 0,
 ):
     """
     Parameters:
@@ -574,7 +590,7 @@ def insert_or_update_data_values(
 
         threshold (int): [Optional] Maximum value of unique values to compute the frequency.
     """
-
+    # TODO - add overwrite parameter
     def get_data_values_columns(
         db_engine_metadata, server_name, catalog_name, schema_name, table_name
     ):
@@ -728,7 +744,9 @@ def insert_or_update_data_values(
         else:
             return -1
 
-    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    table_rows = get_tables_from_metadata(
+        db_engine_source, db_engine_metadata, min_n_rows=min_n_rows
+    )
     pbar = tqdm(table_rows, desc="Data values")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
@@ -763,14 +781,17 @@ def insert_or_update_data_values(
                 table_name,
                 column_name,
             ):
-                delete_from_data_values(
-                    db_engine_metadata,
-                    server_name,
-                    catalog_name,
-                    schema_name,
-                    table_name,
-                    column_name,
-                )
+                if overwrite:
+                    delete_from_data_values(
+                        db_engine_metadata,
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                    )
+                else:
+                    continue
             data_value_rows = get_frequency(
                 db_engine_source, schema_name, table_name, column_name
             )
@@ -805,7 +826,9 @@ def insert_or_update_data_values(
     return
 
 
-def insert_or_update_dates(db_engine_source, db_engine_metadata):
+def insert_or_update_dates(
+    db_engine_source, db_engine_metadata, overwrite=False, min_n_rows: int = 0
+):
     def get_date_columns(
         db_engine_metadata,
         server_name,
@@ -898,7 +921,9 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
         conn.close()
         return
 
-    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    table_rows = get_tables_from_metadata(
+        db_engine_source, db_engine_metadata, min_n_rows=min_n_rows
+    )
     pbar = tqdm(table_rows, desc="Dates")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
@@ -918,14 +943,17 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
                 table_name,
                 column_name,
             ):
-                delete_from_dates(
-                    db_engine_metadata,
-                    server_name,
-                    catalog_name,
-                    schema_name,
-                    table_name,
-                    column_name,
-                )
+                if overwrite:
+                    delete_from_dates(
+                        db_engine_metadata,
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                    )
+                else:
+                    continue
             date_rows = get_dates(
                 db_engine_source, schema_name, table_name, column_name
             )
@@ -952,7 +980,11 @@ def insert_or_update_dates(db_engine_source, db_engine_metadata):
 
 
 def insert_or_update_stats(
-    db_engine_source: str, db_engine_metadata: str, with_percentiles: bool = False
+    db_engine_source: str,
+    db_engine_metadata: str,
+    overwrite: bool = False,
+    with_percentiles: bool = False,
+    min_n_rows: int = 0,
 ):
     def get_numeric_columns(
         db_engine_metadata, server_name, catalog_name, schema_name, table_name
@@ -1080,7 +1112,9 @@ def insert_or_update_stats(
         else:
             return float(value)
 
-    table_rows = get_tables_from_metadata(db_engine_source, db_engine_metadata)
+    table_rows = get_tables_from_metadata(
+        db_engine_source, db_engine_metadata, min_n_rows=min_n_rows
+    )
     pbar = tqdm(table_rows, desc="Stats")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
@@ -1103,14 +1137,17 @@ def insert_or_update_stats(
                 table_name,
                 column_name,
             ):
-                delete_from_stats(
-                    db_engine_metadata,
-                    server_name,
-                    catalog_name,
-                    schema_name,
-                    table_name,
-                    column_name,
-                )
+                if overwrite:
+                    delete_from_stats(
+                        db_engine_metadata,
+                        server_name,
+                        catalog_name,
+                        schema_name,
+                        table_name,
+                        column_name,
+                    )
+                else:
+                    continue
             stats_rows = get_basic_stats(
                 db_engine_source, catalog_name, schema_name, table_name, column_name
             )

@@ -55,6 +55,7 @@ The `databases.ini` file is not syncronised with the repo.
 The database connections have the following format. 
 
 ```CONF
+# databases.ini
 [my-source-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
 host = <IP-OR-HOSTNAME-SOURCE-DATABASE>
@@ -104,6 +105,7 @@ file are:
 * [x] `mssqlserver`
 * [x] `mariadb`
 * [x] `snowflake`
+* [x] `aurora`
 
 #### 3.1 Create the metadata database
 
@@ -112,8 +114,8 @@ You could create a SQLite3 local database or create metadata databases using
 the terminal in the `src/aeda` folder:
 
 ```shell
-python aeda_.py create_db sqlite3   # Creates a sqlite3 database by default, or
-python aeda_.py create_db mysql --section <YOUR-MYSQL-DATABASE>
+python aeda_.py create_db sqlite3 --section <YOUR-SQLITE3-DATABASE>  # Creates a sqlite3 database, or
+python aeda_.py create_db mysql --section <my-metadata-database>
 ```
 
 A connection definition for a SQLite3 database has only three properties:

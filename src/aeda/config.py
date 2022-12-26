@@ -1,6 +1,5 @@
+from enum import Enum
 from pathlib import Path
-
-# TODO add support for aurora data base
 
 AEDA_DIR = Path(__file__).parent.absolute()
 
@@ -17,6 +16,17 @@ SUPPORTED_DB_ENGINES = [
     "snowflake",
     "aurora",
 ]
+
+
+class ExplorationLevel(Enum):
+    server = "server"
+    catalog = "catalog"
+    schema = "schema"
+    table = "table"
+    view = "view"
+    query = "query"
+
+
 EXPLORATION_LEVELS = ["server", "catalog", "schema", "table", "view", "query"]
 
 SQL_CREATE_SCRIPTS = {
