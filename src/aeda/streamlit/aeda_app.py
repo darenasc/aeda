@@ -218,6 +218,33 @@ def stats():
     )
 
 
+def search():
+    st.subheader("Search")
+    st.caption("Search for a value in the database")
+    query_search = """select * from data_values;"""
+    df_search = pd.read_sql(query_search, conn)
+    # st.table(df_search)
+
+    option = st.selectbox(
+        "What value would you like to search for?", df_search["DATA_VALUE"].unique()
+    )
+
+    st.write("You selected:", option)
+    df_search = df_search[df_search["DATA_VALUE"] == option]
+    df_search = df_search[
+        [
+            "SERVER_NAME",
+            "TABLE_CATALOG",
+            "TABLE_SCHEMA",
+            "TABLE_NAME",
+            "COLUMN_NAME",
+            "DATA_VALUE",
+            "FREQUENCY_NUMBER",
+        ]
+    ]
+    st.table(df_search)
+
+
 st.title("Automated Exploratory Data Analysis app")
 
 config = _config.get_db_config()
@@ -350,12 +377,14 @@ c = (
 )
 st.altair_chart(c, use_container_width=True)
 
-tab1, tab2, tab3 = st.tabs(["Data Values", "Dates", "Stats"])
+tab1, tab2, tab3, tab4 = st.tabs(["Data Values", "Dates", "Stats", "Search"])
 with tab1:
     data_values()
 with tab2:
     dates()
 with tab3:
     stats()
+with tab4:
+    search()
 
 # apps[app]()
