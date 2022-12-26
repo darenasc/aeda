@@ -360,10 +360,10 @@ SQL_SCRIPTS = {
                     FROM {1}.{2}
                     GROUP BY DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1)
                     ORDER BY N DESC;""",
-        "aurora": """select date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY) as date
+        "aurora": """SELECT DATE_ADD(DATE_ADD(LAST_DAY(`{0}`), INTERVAL 1 DAY), INTERVAL -1 MONTH) as date
                     , count(*) as N
                     from `{1}`.`{2}`
-                    group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
+                    group by DATE_ADD(DATE_ADD(LAST_DAY(`{0}`), INTERVAL 1 DAY), INTERVAL -1 MONTH);""",
     },
     "get_basic_stats": {
         "mysql": """SELECT CAST(AVG(`{0}`) as FLOAT) AS AVG_

@@ -16,6 +16,7 @@ termcolor = "*"
 mariadb = "*" # MariaDB Connector/Python `sudo apt install libmariadb3 libmariadb-dev`
 snowflake-connector-python = "*"
 aeda = {editable = true, path = "."}
+panel = "*"
 
 [dev-packages]
 black = "*"
