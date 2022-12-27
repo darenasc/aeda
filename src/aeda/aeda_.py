@@ -5,7 +5,7 @@ import typer
 
 from aeda import sql as _sql
 from aeda import utils as _utils
-from aeda.config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES
+from aeda.config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES, ExplorationLevel
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -64,25 +64,25 @@ def explore(
     start_time = datetime.now()
 
     if level == "server":
-        # _sql.insert_or_update_columns(
-        #     db_engine_source, db_engine_metadata, overwrite=overwrite
-        # )
-        # _sql.insert_or_update_tables(
-        #     db_engine_source, db_engine_metadata, overwrite=overwrite
-        # )
-        # _sql.insert_or_update_uniques(
-        #     db_engine_source,
-        #     db_engine_metadata,
-        #     overwrite=overwrite,
-        #     min_n_rows=min_n_rows,
-        # )
-        # _sql.insert_or_update_data_values(
-        #     db_engine_source,
-        #     db_engine_metadata,
-        #     overwrite=overwrite,
-        #     threshold=threshold,
-        #     min_n_rows=min_n_rows,
-        # )
+        _sql.insert_or_update_columns(
+            db_engine_source, db_engine_metadata, overwrite=overwrite
+        )
+        _sql.insert_or_update_tables(
+            db_engine_source, db_engine_metadata, overwrite=overwrite
+        )
+        _sql.insert_or_update_uniques(
+            db_engine_source,
+            db_engine_metadata,
+            overwrite=overwrite,
+            min_n_rows=min_n_rows,
+        )
+        _sql.insert_or_update_data_values(
+            db_engine_source,
+            db_engine_metadata,
+            overwrite=overwrite,
+            threshold=threshold,
+            min_n_rows=min_n_rows,
+        )
         _sql.insert_or_update_dates(
             db_engine_source,
             db_engine_metadata,
