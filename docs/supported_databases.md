@@ -8,4 +8,4 @@
 | <img alt="MSSQLServer" src="https://img.shields.io/badge/MS_SQL_Server-SOURCE_/_METADATA-green"/> | :white_check_mark: | :white_check_mark: |
 | <img alt="SQLite3" src="https://img.shields.io/badge/SQLite3-METADATA-green?logo=sqlite"/> | | :white_check_mark: |
 | <img alt="Snowflake" src="https://img.shields.io/badge/Snowflake-METADATA-green?logo=snowflake"/> | | :white_check_mark: |
-| <img alt="Aurora" src="https://img.shields.io/badge/Amazon_Aurora-SOURCE-green?logo=amazon_aurora"/> | :white_check_mark | |
+| <img alt="Aurora" src="https://img.shields.io/badge/Amazon_Aurora-SOURCE-green?logo=amazon_aurora"/> | :white_check_mark: | |
