@@ -5,7 +5,8 @@ import typer
 
 from aeda import sql as _sql
 from aeda import utils as _utils
-from aeda.config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES, ExplorationLevel
+from aeda.config import (EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES,
+                         ExplorationLevel)
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)

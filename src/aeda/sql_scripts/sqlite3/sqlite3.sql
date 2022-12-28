@@ -81,3 +81,18 @@ select      server_name
             , sum(n_rows) as n_rows 
 from tables
 group by server_name, table_catalog , table_schema;
+
+CREATE VIEW IF NOT EXISTS summary_dates AS 
+select      server_name
+            , table_catalog 
+            , table_schema 
+            , table_name
+            , column_name
+            , max(date(data_value)) as max_date
+            , min(date(data_value)) as min_date
+            , JULIANDAY(max(date(data_value))) - JULIANDAY(min(date(data_value))) as range_days
+            , COUNT(*) as records
+            , COUNT(*) / (JULIANDAY(max(date(data_value))) - JULIANDAY(min(date(data_value)))) as records_per_day
+from dates d 
+where DATA_VALUE is not null
+group by SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COLUMN_NAME;

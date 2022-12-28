@@ -78,3 +78,5 @@ select      server_name
             , sum(n_rows) as n_rows
 from `tables` 
 group by server_name, table_catalog, table_schema;
+
+-- TODO - add a view for summary of dates

@@ -85,3 +85,5 @@ select      server_name
 from tables
 group by server_name, table_catalog , table_schema;
 GO
+
+-- TODO - add view of dates summary
