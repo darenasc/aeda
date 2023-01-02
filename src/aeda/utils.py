@@ -20,6 +20,15 @@ logger = logging.getLogger(__name__)
 
 
 def get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict:
+    """get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict
+
+    Args:
+        db_conf (str): _description_
+        filename (Path, optional): _description_. Defaults to CONFIG_DB.
+
+    Returns:
+        dict: _description_
+    """
     parser = ConfigParser()
     # filename = CONFIG_DB
     parser.read(filename)
@@ -40,6 +49,15 @@ def get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict:
 def get_connection_parameters(
     db_conf: str, filename: Path = CONFIG_DB
 ) -> Union[str, str, str, str]:
+    """get_connection_parameters(db_conf: str, filename: Path = CONFIG_DB) -> Union[str, str, str, str]
+
+    Args:
+        db_conf (str): _description_
+        filename (Path, optional): _description_. Defaults to CONFIG_DB.
+
+    Returns:
+        Union[str, str, str, str]: _description_
+    """
     connection_string = get_db_connection_string(db_conf, filename=filename)
     db_engine = connection_string["db_engine"]
     server_name = connection_string["host"]

@@ -23,6 +23,10 @@ black = "*"
 pytest = "*"
 isort = "*"
 pre-commit = "*"
+sphinx-rtd-theme = "*"
+recommonmark = "*"
+nbsphinx = "*"
+rst-to-myst = {extras = ["sphinx"], version = "*"}
 
 [requires]
 python_version = "3.10"
