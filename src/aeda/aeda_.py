@@ -5,8 +5,7 @@ import typer
 
 from aeda import sql as _sql
 from aeda import utils as _utils
-from aeda.config import (EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES,
-                         ExplorationLevel)
+from aeda.config import EXPLORATION_LEVELS, SUPPORTED_DB_ENGINES, ExplorationLevel
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT)
@@ -16,13 +15,18 @@ app = typer.Typer()
 
 
 @app.command("create_db")
-def create_database(db_engine: str, section: str = None, overwrite: bool = False):
+def create_database(
+    db_engine: str = typer.Option(..., help="Database engine."),
+    section: str = typer.Option(None, help="Section of the configuration file."),
+    overwrite: bool = typer.Option(False, help="Overwrite existing metadata."),
+):
     """
     Parameters:
         db_engine (str): Class of database engine to be used.
 
         db_conf_section: Contains the information to connect to the database of the `db_engine` type.
     """
+    # TODO: Remove the db_engine parameter and use the section parameter to get the db_engine type.
     assert db_engine in SUPPORTED_DB_ENGINES, "{} is not supported.".format(db_engine)
 
     _sql.create_database(section)
@@ -32,13 +36,13 @@ def create_database(db_engine: str, section: str = None, overwrite: bool = False
 
 @app.command()
 def explore(
-    source: str,
-    metadata: str,
-    level: str = "server",
-    overwrite: bool = True,
-    threshold: int = 5_000,
-    min_n_rows: int = 0,
-    percentiles: bool = False,
+    source: str = typer.Option(..., help="Source database connection string."),
+    metadata: str = typer.Option(..., help="Metadata database connection string."),
+    level: str = typer.Option("server", help="Exploration level."),
+    overwrite: bool = typer.Option(True, help="Overwrite existing metadata."),
+    threshold: int = typer.Option(5_000, help="Threshold for data values."),
+    min_n_rows: int = typer.Option(0, help="Minimum number of rows for data_values."),
+    percentiles: bool = typer.Option(False, help="Compute percentiles."),
 ):
     """
     Parameters:
@@ -104,7 +108,10 @@ def explore(
 
 
 @app.command()
-def test_connections(source: str, metadata: str):
+def test_connections(
+    source: str = typer.Option(..., help="Source database connection string."),
+    metadata: str = typer.Option(..., help="Metadata database connection string."),
+):
 
     db_engine_source = source
     db_engine_metadata = metadata
