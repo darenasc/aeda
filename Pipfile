@@ -17,6 +17,7 @@ mariadb = "==1.0.11" # MariaDB Connector/Python `sudo apt install libmariadb3 li
 snowflake-connector-python = "*"
 aeda = {editable = true, path = "."}
 panel = "*"
+pipfile = "*"
 
 [dev-packages]
 black = "*"
