@@ -112,7 +112,6 @@ def test_connections(
     source: str = typer.Option(..., help="Source database connection string."),
     metadata: str = typer.Option(..., help="Metadata database connection string."),
 ):
-
     db_engine_source = source
     db_engine_metadata = metadata
     conn_string_source = _utils.get_db_connection_string(db_engine_source)

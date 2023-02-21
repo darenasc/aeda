@@ -4,6 +4,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
 
+from hdbcli import dbapi
 import mariadb
 import psycopg2
 import pymysql
@@ -155,10 +156,32 @@ def get_db_connection(conn_string):
         except:
             logger.error("Database connection error")
             raise
+    elif conn_string["db_engine"] == "saphana":
+        try:
+            conn = dbapi.connect(
+                user=conn_string["user"],
+                password=conn_string["password"],
+                address=conn_string["host"],
+                port=int(conn_string["port"]),
+            )
+        except Exception as e:
+            logger.error("Database connection error SAP")
+            print(e)
+            raise
+    elif conn_string["db_engine"] == "saphana_odbc":
+        try:
+            conn = pyodbc.connect(
+                f"DSN={conn_string['odbc_name']};UID={conn_string['user']};PWD={conn_string['password']}"
+            )
+        except Exception as e:
+            logger.error("Database connection error")
+            print(e)
+            raise
     return conn
 
 
 def check_database_connection(conn_string: str):
+    # conn = get_db_connection(conn_string)
     try:
         conn = get_db_connection(conn_string)
         cursor = conn.cursor()

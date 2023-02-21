@@ -16,3 +16,9 @@ user = <METADATA-USER>
 password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
 metadata_database = yes
+
+[<my-sqlite3-metadata-database>]
+db_engine = sqlite3
+schema = <FILENAME-WITHOUT-EXTENSION-(DATABASE-NAME)>
+folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
+metadata_database = yes
