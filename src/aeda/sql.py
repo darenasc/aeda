@@ -431,6 +431,7 @@ def insert_or_update_uniques(
 
         overwrite (bool): (Optional)
     """
+
     def get_unique_values(db_engine_source: str, table_name: str, column_name: str):
         """
         Returns `count_distinct` and `count_null`
@@ -589,6 +590,7 @@ def insert_or_update_data_values(
 
         threshold (int): [Optional] Maximum value of unique values to compute the frequency.
     """
+
     def get_data_values_columns(
         db_engine_metadata, server_name, catalog_name, schema_name, table_name
     ):

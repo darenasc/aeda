@@ -15,6 +15,8 @@ SUPPORTED_DB_ENGINES = [
     "mariadb",
     "snowflake",
     "aurora",
+    "saphana",
+    "saphana_odbc",
 ]
 
 
@@ -64,6 +66,8 @@ DATA_TYPES = {
         "array",
         "bytea",
         "regconfig",
+        "nclob",
+        "NCLOB" "lob",
     ],
 }
 
@@ -77,6 +81,8 @@ SQL_SCRIPTS = {
         "mssqlserver": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
         "mariadb": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
         "aurora": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
+        "saphana": """SELECT ? AS SERVER_NAME, ? AS TABLE_CATALOG, C.SCHEMA_NAME AS TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.POSITION AS ORDINAL_POSITION, C.DATA_TYPE_NAME AS DATA_TYPE FROM table_columns AS C WHERE schema_name = ?;""",
+        "saphana_odbc": """SELECT ? AS SERVER_NAME, ? AS TABLE_CATALOG, C.SCHEMA_NAME AS TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.POSITION AS ORDINAL_POSITION, C.DATA_TYPE_NAME AS DATA_TYPE FROM table_columns AS C WHERE schema_name = ?;""",
     },
     "insert_into_columns": {
         "mysql": """insert into columns (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE) values (%s, %s, %s, %s, %s, %s, %s);""",
@@ -106,7 +112,7 @@ SQL_SCRIPTS = {
         "mysql": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (%s, %s, %s, %s, %s, %s, %s);""",
         "postgres": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (%s, %s, %s, %s, %s, %s, %s);""",
         "snowflake": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (%s, %s, %s, %s, %s, %s, %s);""",
-        "sqlite3": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
+        "sqlite3": """insert or ignore into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
         "mssqlserver": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
         "mariadb": """insert into data_values (SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_VALUE, FREQUENCY_NUMBER) values (?, ?, ?, ?, ?, ?, ?);""",
     },
@@ -236,6 +242,8 @@ SQL_SCRIPTS = {
         "mssqlserver": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "mariadb": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "aurora": """SELECT %s AS SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COUNT(*) AS N_COLUMNS, NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
+        "saphana": """SELECT ? AS SERVER_NAME , ? AS TABLE_CATALOG , SCHEMA_NAME AS TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = ? AND TABLE_NAME = ? GROUP BY SCHEMA_NAME , TABLE_NAME ORDER BY 1,2,3,4;""",
+        "saphana_odbc": """SELECT ? AS SERVER_NAME , ? AS TABLE_CATALOG , SCHEMA_NAME AS TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = ? AND TABLE_NAME = ? GROUP BY SCHEMA_NAME , TABLE_NAME ORDER BY 1,2,3,4;""",
     },
     "number_of_rows": {
         "mysql": """select count(*) as n from `{}`.`{}`""",
@@ -243,6 +251,8 @@ SQL_SCRIPTS = {
         "mssqlserver": """select count(*) as n from {}.{}""",
         "mariadb": """select count(*) as n from {}.{}""",
         "aurora": """select count(*) as n from `{}`.`{}`""",
+        "saphana": '''select count(*) as n from {}."{}"''',
+        "saphana_odbc": '''select count(*) as n from {}."{}"''',
     },
     "update_tables": {
         "mysql": """UPDATE tables SET N_ROWS = %s WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s;""",
@@ -264,7 +274,9 @@ SQL_SCRIPTS = {
         "mysql": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s;""",
         "postgres": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s;""",
         "snowflake": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s;""",
-        "sqlite3": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?;""",
+        "sqlite3": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? AND lower(DATA_TYPE) NOT IN ({});""".format(
+            ", ".join(["'" + x + "'" for x in DATA_TYPES["filter_types"]])
+        ),
         "mssqlserver": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?;""",
         "mariadb": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = ? AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?;""",
     },
@@ -274,6 +286,8 @@ SQL_SCRIPTS = {
         "mssqlserver": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "mariadb": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "aurora": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM `{1}`.`{2}`""",
+        "saphana": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}."{2}" """,
+        "saphana_odbc": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}."{2}" """,
     },
     "get_distinct_values": {
         "mysql": """select DISTINCT_VALUES from uniques where SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s;""",
@@ -290,6 +304,8 @@ SQL_SCRIPTS = {
         "mssqlserver": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mariadb": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "aurora": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM `{1}`.`{2}` GROUP BY `{0}`;""",
+        "saphana": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}."{2}" GROUP BY "{0}";""",
+        "saphana_odbc": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}."{2}" GROUP BY "{0}";""",
     },
     "get_data_values_columns": {
         "mysql": """select column_name , ORDINAL_POSITION , DATA_TYPE from columns WHERE SERVER_NAME = %s AND TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s AND lower(DATA_TYPE) NOT IN ({});""".format(
@@ -364,6 +380,14 @@ SQL_SCRIPTS = {
                     , count(*) as N
                     from `{1}`.`{2}`
                     group by DATE_ADD(DATE_ADD(LAST_DAY(`{0}`), INTERVAL 1 DAY), INTERVAL -1 MONTH);""",
+        "saphana": """SELECT ADD_MONTHS(NEXT_DAY(LAST_DAY(CURRENT_DATE)),-1) AS date, count(*) as N 
+                    FROM {1}."{2}"
+                    GROUP BY ADD_MONTHS(NEXT_DAY(LAST_DAY(CURRENT_DATE)),-1)
+                    ORDER BY N DESC;""",
+        "saphana_odbc": """SELECT ADD_MONTHS(NEXT_DAY(LAST_DAY(CURRENT_DATE)),-1) AS date, count(*) as N 
+                    FROM {1}."{2}"
+                    GROUP BY ADD_MONTHS(NEXT_DAY(LAST_DAY(CURRENT_DATE)),-1)
+                    ORDER BY N DESC;""",
     },
     "get_basic_stats": {
         "mysql": """SELECT CAST(AVG(`{0}`) as FLOAT) AS AVG_
@@ -406,6 +430,22 @@ SQL_SCRIPTS = {
                     , CAST(MIN(`{0}`) as FLOAT) AS MIN_
                     , CAST(MAX(`{0}`) - MIN(`{0}`) AS FLOAT) as RANGE_
                     FROM {1}.{2};""",
+        "saphana": """SELECT CAST(AVG("{0}") as FLOAT) AS AVG_
+                    , CAST(STDDEV("{0}") as FLOAT) as STDEV_
+                    , CAST(VAR("{0}") as FLOAT) as VAR_
+                    , CAST(SUM("{0}") as FLOAT) as SUM_
+                    , CAST(MAX("{0}") as FLOAT) AS MAX_
+                    , CAST(MIN("{0}") as FLOAT) AS MIN_
+                    , CAST(MAX("{0}") - MIN("{0}") AS FLOAT) as RANGE_
+                    FROM "{1}"."{2}";""",
+        "saphana_odbc": """SELECT CAST(AVG("{0}") as FLOAT) AS AVG_
+                    , CAST(STDDEV("{0}") as FLOAT) as STDEV_
+                    , CAST(VAR("{0}") as FLOAT) as VAR_
+                    , CAST(SUM("{0}") as FLOAT) as SUM_
+                    , CAST(MAX("{0}") as FLOAT) AS MAX_
+                    , CAST(MIN("{0}") as FLOAT) AS MIN_
+                    , CAST(MAX("{0}") - MIN("{0}") AS FLOAT) as RANGE_
+                    FROM "{1}"."{2}";""",
     },
     "get_percentiles": {
         "mysql": """with cte1 as 

@@ -17,6 +17,8 @@ mariadb = "==1.0.11" # MariaDB Connector/Python `sudo apt install libmariadb3 li
 snowflake-connector-python = "*"
 aeda = {editable = true, path = "."}
 panel = "*"
+pipfile = "*"
+hdbcli = "*"
 
 [dev-packages]
 black = "*"
@@ -30,3 +32,6 @@ rst-to-myst = {extras = ["sphinx"], version = "*"}
 
 [requires]
 python_version = "3.10"
+
+[pipenv]
+allow_prereleases = true

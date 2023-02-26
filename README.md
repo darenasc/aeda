@@ -54,7 +54,7 @@ The `databases.ini` file is not syncronised with the repo.
 
 The database connections have the following format. 
 
-```CONF
+```ini
 # databases.ini
 [my-source-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
@@ -74,6 +74,12 @@ catalog = <CATALOG-METADATA-DATABASE>
 user = <METADATA-USER>
 password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
+metadata_database = yes
+
+[<SQLITE3-REFERENCE-NAME>]
+db_engine = sqlite3
+schema = <SQLITE3-DATABASE-NAME>
+folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
 metadata_database = yes
 ```
 
@@ -106,6 +112,8 @@ file are:
 * [x] `mariadb`
 * [x] `snowflake`
 * [x] `aurora`
+* [x] `saphana`
+* [x] `saphana_odbc`
 
 #### 3.1 Create the metadata database
 
@@ -134,7 +142,7 @@ following command:
 
 ```bash
 cd src/aeda
-python aeda_.py test-connections my-source-database my-metadata-database
+python aeda_.py test-connections --source my-source-database --metadata my-metadata-database
 ```
 
 Where `my-source-database` and `my-metadata-database` are the names of the 
@@ -154,7 +162,7 @@ in the `src/aeda` folder:
 
 ```bash
 cd src/aeda
-python aeda_.py explore my-source-database my-metadata-database
+python aeda_.py explore --source my-source-database --metadata my-metadata-database
 ```
 
 Where `my-source-database` and `my-metadata-database` are the names of the 
