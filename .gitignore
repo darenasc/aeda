@@ -137,3 +137,5 @@ archive_code/*
 sqlite3-dbs/*
 docs/images/*
 Pipfile.lock
+processed_tables.txt
+**/*copy.py

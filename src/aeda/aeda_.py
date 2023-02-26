@@ -122,6 +122,12 @@ def test_connections(
     return
 
 
+@app.command()
+def list_connections():
+    _utils.list_connections()
+    return
+
+
 def load():
     pass
 

@@ -6,11 +6,13 @@ from typing import Union
 
 from hdbcli import dbapi
 import mariadb
+import pandas as pd
 import psycopg2
 import pymysql
 import pyodbc
 import requests
 import snowflake.connector
+from tabulate import tabulate
 from termcolor import colored
 
 from aeda.config import CONFIG_DB, SQL_SCRIPTS
@@ -218,4 +220,47 @@ def check_database_connection(conn_string: str):
 def check_database_connections(conn_string_source, conn_string_metadata):
     check_database_connection(conn_string_source)
     check_database_connection(conn_string_metadata)
+    return
+
+
+def list_connections():
+    """List all connections in the config file"""
+    parser = ConfigParser()
+    if Path.exists(CONFIG_DB):
+        filename = CONFIG_DB
+    else:
+        raise FileNotFoundError(
+            f'Config file not found in "{CONFIG_DB}"'
+        )
+    
+    parser.read(filename)
+    
+    dfs = []
+    for section in parser.sections():
+        columns = [key for key, value in parser.items(section)]
+        values = [value for key, value in parser.items(section)]
+        columns.append("section")
+        values.append(section)
+        df = pd.DataFrame([values], columns=columns)
+        dfs.append(df)
+
+    df_connections = (
+        pd.concat(dfs, axis=0, ignore_index=True)
+        .fillna("")
+        .sort_values(["db_engine", "host", "schema", "catalog", "metadata_database"])
+    )
+    df_connections = df_connections[
+        ["section", "db_engine"]
+        + [x for x in df_connections.columns if x not in ("db_engine", "section")]
+    ]
+    columns = [
+        column
+        for column in df_connections.columns
+        if column not in ["user", "password", "encoding"]
+    ]
+    print(
+        tabulate(
+            df_connections[columns], headers="keys", tablefmt="pretty", showindex=False
+        )
+    )
     return

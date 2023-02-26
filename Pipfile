@@ -19,6 +19,7 @@ aeda = {editable = true, path = "."}
 panel = "*"
 pipfile = "*"
 hdbcli = "*"
+tabulate = "*"
 
 [dev-packages]
 black = "*"
