@@ -64,7 +64,6 @@ catalog = <CATALOG-SOURCE-DATABASE>
 user = <SOURCE-USER>
 password = <SOURCE-PASSWORD>
 port = <SOURCE-PORT>
-metadata_database = yes # yes or no optional parameter
 
 [my-metadata-database]
 db_engine = <A-SUPPORTED-DB-ENGINE>
@@ -74,7 +73,7 @@ catalog = <CATALOG-METADATA-DATABASE>
 user = <METADATA-USER>
 password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
-metadata_database = yes
+metadata_database = yes # yes or no optional parameter
 
 [<SQLITE3-REFERENCE-NAME>]
 db_engine = sqlite3
@@ -153,6 +152,15 @@ This should print the following:
 ```
 [ OK ]  Connection to the ****.****.**** source tested successfully...
 [ OK ]  Connection to the ****.****.**** source tested successfully...
+```
+
+#### 3.3 List the connections
+
+Once you add your connections, you can check them using the `list-connections`.
+
+```bash
+cd src/aeda
+python aeda_.py list-connections
 ```
 
 ### 4. Exploring the source database
