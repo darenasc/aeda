@@ -67,7 +67,8 @@ DATA_TYPES = {
         "bytea",
         "regconfig",
         "nclob",
-        "NCLOB" "lob",
+        "NCLOB",
+        "lob",
     ],
 }
 

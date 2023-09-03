@@ -201,7 +201,7 @@ def stats():
     st.subheader("Statistics")
     query_stats = """select * from stats;"""
     df_stats = pd.read_sql(query_stats, conn)
-    st.table(
+    st.dataframe(
         df_stats[
             [
                 "TABLE_NAME",
@@ -242,7 +242,7 @@ def search():
             "FREQUENCY_NUMBER",
         ]
     ]
-    st.table(df_search)
+    st.dataframe(df_search)
 
 
 st.title("Automated Exploratory Data Analysis app")
@@ -285,9 +285,9 @@ connection_string = _config.get_db_connection_string(add_selectbox)
 conn = _config.get_db_connection(connection_string)
 
 query_metrics = """select count(distinct server_name) as n 
-                        , count(distinct table_catalog) as databases
+                        , count(distinct table_catalog) as 'databases'
                         , sum(n_tables) as tables
-                        , sum(n_rows) as rows
+                        , sum(n_rows) as 'rows'
                         , sum(n_columns) as n_columns
                     from servers;"""
 df_metrics = pd.read_sql(query_metrics, conn)
@@ -303,7 +303,7 @@ col5.metric("Records", "{:,}".format(int(df_metrics.rows.values[0])))
 st.subheader("Servers")
 query_servers = """select * from servers;"""
 df_servers = pd.read_sql(query_servers, conn)
-st.table(df_servers)
+st.dataframe(df_servers)
 
 st.subheader("Tables")
 query_tables = """select * from tables;"""

@@ -34,7 +34,6 @@ def create_database(section: str):
             cursor.execute(script)
             conn.commit()
         cursor.close()
-
         conn.close()
     elif conn_string["db_engine"] == "sqlite3":
         dbname = str(conn_string["schema"] + ".db")
@@ -58,7 +57,7 @@ def create_database(section: str):
         cursor.close()
         conn.close()
 
-    logger.info("A {} database created".format(conn_string["db_engine"]))
+    logger.info(f"A {conn_string['db_engine']} database created")
 
     return
 
@@ -99,11 +98,11 @@ def insert_or_update_columns(
 ):
     """
     Parameters:
-        db_engine_source (str): Section in the .ini file with databases connection parameters.
+        db_engine_source (str): Section in the databases.ini file with databases connection parameters.
 
-        db_engine_metadata (str):
+        db_engine_metadata (str): Section in the databases.ini file with the metadata database connection.
 
-        overwrite (bool) = True
+        overwrite (bool) = True.
     """
 
     def check_if_column_exists(
@@ -166,10 +165,6 @@ def insert_or_update_columns(
         return
 
     column_rows = get_columns(db_engine_source)
-    # conn_string = _utils.get_db_connection_string(db_engine_metadata)
-    # conn = _utils.get_db_connection(conn_string)
-    # query = SQL_SCRIPTS["insert_into_columns"][conn_string["db_engine"]]
-    # cursor = conn.cursor()
     data = []
     pbar = tqdm(column_rows, desc="Columns - ")
     for row in pbar:
@@ -183,7 +178,7 @@ def insert_or_update_columns(
             data_type,
         ) = row
 
-        pbar.set_description("Columns: {}.{}".format(table_name, column_name))
+        pbar.set_description(f"Columns: {table_name}.{column_name}")
         if overwrite and check_if_column_exists(
             db_engine_metadata,
             server_name,
@@ -213,20 +208,6 @@ def insert_or_update_columns(
                 )
             )
     insert_many_into_columns(db_engine_metadata, data)
-    #         cursor.execute(
-    #             query,
-    #             (
-    #                 server_name,
-    #                 table_catalog,
-    #                 table_schema,
-    #                 table_name,
-    #                 column_name,
-    #                 ordinal_position,
-    #                 data_type,
-    #             ),
-    #         )
-    #         conn.commit()
-    # cursor.close()
     return
 
 
@@ -340,7 +321,7 @@ def insert_or_update_tables(
             schema_name,
             table_name,
         )
-        pbar.set_description("Tables - {}".format(table_name))
+        pbar.set_description(f"Tables - {table_name}")
         if check_if_table_exists(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         ):
@@ -534,7 +515,6 @@ def insert_or_update_uniques(
     pbar = tqdm(table_rows, desc="Uniques")
     for row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = row
-        # pbar.set_description("Uniques - {}".format(table_name))
         pbar.set_description(f"Uniques - {table_name} ({n_rows:,} rows)")
         if check_if_unique_exists(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
@@ -555,7 +535,7 @@ def insert_or_update_uniques(
         pbar1 = tqdm(column_rows, leave=False)
         for column_row in pbar1:
             column_name, ordinal_position, data_type = column_row
-            pbar1.set_description("Uniques - {}.{}".format(table_name, column_name))
+            pbar1.set_description(f"Uniques - {table_name}.{column_name}")
             count_distinct, count_null = get_unique_values(
                 db_engine_source, table_name, column_name
             )
@@ -750,14 +730,14 @@ def insert_or_update_data_values(
     pbar = tqdm(table_rows, desc="Data values")
     for table_row in pbar:
         server_name, catalog_name, schema_name, table_name, n_rows = table_row
-        pbar.set_description("Data values - {} ({:,})".format(table_name, n_rows))
+        pbar.set_description(f"Data values - {table_name} ({n_rows:,})")
         column_rows = get_data_values_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
         pbar1 = tqdm(column_rows, leave=False)
         for column_row in pbar1:
             column_name, ordinal_position, data_type = column_row
-            pbar1.set_description("Data values - {}.{}".format(table_name, column_name))
+            pbar1.set_description(f"Data values - {table_name}.{column_name}")
             num_uniques = get_num_distinct_values(
                 db_engine_metadata,
                 server_name,
@@ -812,16 +792,6 @@ def insert_or_update_data_values(
                         int(num_rows),
                     )
                 )
-            # insert_into_data_values(
-            #     db_engine_metadata,
-            #     server_name,
-            #     catalog_name,
-            #     schema_name,
-            #     table_name,
-            #     column_name,
-            #     value,
-            #     num_rows,
-            # )
             insert_many_into_data_values(db_engine_metadata, data)
     return
 
@@ -1263,12 +1233,7 @@ def explore(db_engine_source: str, level: str):
     rows = cursor.fetchall()
 
     logger.info(
-        "{} columns from {}.{}.{}".format(
-            cursor.rowcount,
-            conn_string["host"],
-            conn_string["catalog"],
-            conn_string["schema"],
-        )
+        f"{cursor.rowcount} columns from {conn_string['host']}.{conn_string['catalog']}.{conn_string['schema']}"
     )
 
     cursor.close()

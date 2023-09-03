@@ -27,7 +27,7 @@ def create_database(
         db_conf_section: Contains the information to connect to the database of the `db_engine` type.
     """
     # TODO: Remove the db_engine parameter and use the section parameter to get the db_engine type.
-    assert db_engine in SUPPORTED_DB_ENGINES, "{} is not supported.".format(db_engine)
+    assert db_engine in SUPPORTED_DB_ENGINES, f"{db_engine} is not supported."
 
     _sql.create_database(section)
 
@@ -46,9 +46,19 @@ def explore(
 ):
     """
     Parameters:
-        db_engine (str):
+        source (str): Source database to profile.
 
-        level (str): ['server', 'catalog', 'schema', 'table', 'view', 'query']
+        metadata (str): Database to store metadata information.
+
+        level (str): Level of profiling. ['server', 'catalog', 'schema', 'table', 'view', 'query']
+
+        overwrite (bool): Overwrite metadata information.
+
+        threshold (int): Maximum unique values to store in data values.
+
+        min_n_rows (int): Minimum number of rows for a table to be processed.
+
+        percentiles (bool): Compute percentiles.
     """
 
     db_engine_source = source
@@ -58,11 +68,11 @@ def explore(
 
     assert (
         conn_string_source["db_engine"] in SUPPORTED_DB_ENGINES
-    ), "{} is not supported.".format(conn_string_source["db_engine"])
+    ), f"{conn_string_source['db_engine']} is not supported."
     assert (
         conn_string_metadata["db_engine"] in SUPPORTED_DB_ENGINES
-    ), "{} is not supported.".format(conn_string_metadata["dn_engine"])
-    assert level in EXPLORATION_LEVELS, "{} is not supported.".format(level)
+    ), f"{conn_string_metadata['db_engine']} is not supported."
+    assert level in EXPLORATION_LEVELS, "{level} is not supported."
 
     _utils.check_database_connections(conn_string_source, conn_string_metadata)
 
@@ -108,22 +118,38 @@ def explore(
 
 
 @app.command()
-def test_connections(
-    source: str = typer.Option(..., help="Source database connection string."),
-    metadata: str = typer.Option(..., help="Metadata database connection string."),
-):
-    db_engine_source = source
-    db_engine_metadata = metadata
-    conn_string_source = _utils.get_db_connection_string(db_engine_source)
-    conn_string_metadata = _utils.get_db_connection_string(db_engine_metadata)
+def test_connections(connection_names: list[str]):
+    """Test if a list of connections are responding.
 
-    _utils.check_database_connections(conn_string_source, conn_string_metadata)
+    Args:
+        connection_names (list[str]): Names of sections from the `databases.ini` config file.
+    """
+    for connection_name in connection_names:
+        test_connection(connection_name=connection_name)
+
+    return
+
+
+@app.command()
+def test_connection(
+    connection_name: str,
+):
+    """Tets if the connection to the database is working or not.
+
+    Args:
+        connection_name (str): Name of the section in the `databases.ini` config file.
+    """
+    db_engine_source = connection_name
+    conn_string_source = _utils.get_db_connection_string(db_engine_source)
+
+    _utils.check_database_connection(conn_string_source)
 
     return
 
 
 @app.command()
 def list_connections():
+    """List of available connections."""
     _utils.list_connections()
     return
 

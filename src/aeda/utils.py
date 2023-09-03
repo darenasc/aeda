@@ -71,6 +71,7 @@ def get_db_connection(conn_string):
     conn = None
     if conn_string["db_engine"] == "postgres":
         try:
+            # TODO Add profiling to schemas different than `public`
             import psycopg2
 
             conn = psycopg2.connect(
@@ -180,6 +181,7 @@ def get_db_connection(conn_string):
     elif conn_string["db_engine"] == "saphana_odbc":
         try:
             import pyodbc
+
             conn = pyodbc.connect(
                 f"DSN={conn_string['odbc_name']};UID={conn_string['user']};PWD={conn_string['password']}"
             )
@@ -196,31 +198,21 @@ def check_database_connection(conn_string: str):
         conn = get_db_connection(conn_string)
         cursor = conn.cursor()
         if conn_string["db_engine"] == "sqlite3":
+            db_connection_name = f"{conn_string['schema']}.db"
             print(
-                "[",
-                colored("OK", "green"),
-                "]",
-                "\tConnection to the {}.db source tested successfully...".format(
-                    conn_string["schema"]
-                ),
+                f"[ {colored('OK', 'green')} ]\t{colored(conn_string['db_engine'], 'green', attrs=['bold'])} connection to {colored(db_connection_name, 'green', attrs=['bold'])} established..."
             )
         else:
+            db_connection_name = f"{conn_string['host']}.{conn_string['catalog']}.{conn_string['schema']}"
             print(
-                "[",
-                colored("OK", "green"),
-                "]",
-                "\tConnection to the {}.{}.{} source tested successfully...".format(
-                    conn_string["host"], conn_string["catalog"], conn_string["schema"]
-                ),
+                f"[ {colored('OK', 'green')} ]\t{colored(conn_string['db_engine'], 'green', attrs=['bold'])} connection to {colored(db_connection_name, 'green', attrs=['bold'])} established..."
             )
+
         cursor.close()
         conn.close()
     except:
         print(
-            "[",
-            colored("Error", "red"),
-            "]",
-            "\tCan't establish connection to the metadata database...",
+            f"[{colored('Error', 'red')}]\tCan't establish connection to the metadata database..."
         )
     return
 
@@ -237,12 +229,10 @@ def list_connections():
     if Path.exists(CONFIG_DB):
         filename = CONFIG_DB
     else:
-        raise FileNotFoundError(
-            f'Config file not found in "{CONFIG_DB}"'
-        )
-    
+        raise FileNotFoundError(f'Config file not found in "{CONFIG_DB}"')
+
     parser.read(filename)
-    
+
     dfs = []
     for section in parser.sections():
         columns = [key for key, value in parser.items(section)]
