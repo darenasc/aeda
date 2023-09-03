@@ -4,9 +4,9 @@
 ![](https://img.shields.io/github/last-commit/darenasc/aeda)
 ![](https://img.shields.io/github/stars/darenasc/aeda?style=social)
 
-**AEDA** will automatically profile any [supported database](docs/supported_databases.md) 
+**AEDA** will automatically profile any [supported database](documentation/supported_databases.md) 
 using reading access priviledges. The results of the profiling will be stored 
-in a second [supported database](docs/supported_databases.md) with write 
+in a second [supported database](documentation/supported_databases.md) with write 
 priviledges.
 
 Profiling a database means **metadata extraction** from all the tables of a 
@@ -16,7 +16,7 @@ database is a **data catalog**.
 
 **AEDA** generates SQL queries to be executed in the source database and 
 store the results in a metadata database. The structure of the metadata 
-database can be found in this [document](docs/sql_code.md).
+database can be found in this [document](documentation/sql_code.md).
 
 ## Usage
 
@@ -134,7 +134,15 @@ schema = <SQLITE3-DATABASE-NAME>
 folder = <PATH/TO/THE/FOLDER/OF/THE/SQLITE3/DATABASE>
 ```
 
-#### 3.2 Test the connections
+#### 3.2. Check connections
+
+You can check what connections are available using `list-connections` that will list the connections available. You can use the name in the `section` column to refer to that specific connection.
+
+```bash
+python aeda_.py list-connections
+```
+
+#### 3.3 Test the connections
 
 To test the connections to the databases you have created, you can use the 
 following command:
@@ -149,7 +157,7 @@ connection definitions in the `databases.ini` configuration file.
 
 This should print the following:
 
-```
+```bash
 [ OK ]  Connection to the ****.****.**** source tested successfully...
 [ OK ]  Connection to the ****.****.**** source tested successfully...
 ```
@@ -197,7 +205,7 @@ You can query the resulting database or use a minimalistic user interface
 develped with [streamlit](https://streamlit.io) from the `src/aeda/streamlit` 
 folder. It will publish the report in the port `5000` of your `localhost`.
 
-```
+```bash
 cd src/aeda/streamlit
 streamlit run aeda_app.py
 ```

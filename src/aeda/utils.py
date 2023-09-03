@@ -4,14 +4,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
 
-from hdbcli import dbapi
-import mariadb
 import pandas as pd
-import psycopg2
-import pymysql
-import pyodbc
-import requests
-import snowflake.connector
 from tabulate import tabulate
 from termcolor import colored
 
@@ -78,6 +71,8 @@ def get_db_connection(conn_string):
     conn = None
     if conn_string["db_engine"] == "postgres":
         try:
+            import psycopg2
+
             conn = psycopg2.connect(
                 host=conn_string["host"],
                 user=conn_string["user"],
@@ -90,6 +85,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] in ["mysql"]:
         try:
+            import pymysql
+
             conn = pymysql.connect(
                 host=conn_string["host"],
                 user=conn_string["user"],
@@ -102,6 +99,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] in ["aurora"]:
         try:
+            import pymysql
+
             conn = pymysql.connect(
                 host=conn_string["host"],
                 user=conn_string["user"],
@@ -114,6 +113,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "mssqlserver":
         try:
+            import pyodbc
+
             conn = pyodbc.connect(
                 DRIVER="{ODBC Driver 17 for SQL Server}",
                 server=conn_string["host"],
@@ -128,6 +129,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "mariadb":
         try:
+            import mariadb
+
             conn = mariadb.connect(
                 user=conn_string["user"],
                 password=conn_string["password"],
@@ -147,6 +150,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "snowflake":
         try:
+            import snowflake.connector
+
             conn = snowflake.connector.connect(
                 user=conn_string["user"],
                 password=conn_string["password"],
@@ -160,6 +165,8 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "saphana":
         try:
+            from hdbcli import dbapi
+
             conn = dbapi.connect(
                 user=conn_string["user"],
                 password=conn_string["password"],
@@ -172,6 +179,7 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "saphana_odbc":
         try:
+            import pyodbc
             conn = pyodbc.connect(
                 f"DSN={conn_string['odbc_name']};UID={conn_string['user']};PWD={conn_string['password']}"
             )
