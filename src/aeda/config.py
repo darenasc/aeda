@@ -373,6 +373,9 @@ SQL_SCRIPTS = {
                     , count(*) as N
                     from `{1}`.`{2}`
                     group by date_add(`{0}`, interval - DAY(`{0}`) + 1 DAY);""",
+        "postgres": """select date_trunc('month', "{0}")::date , count(*) as N
+                    from {1}.{2} 
+                    group by date_trunc('month', "{0}")::date;""",
         "mssqlserver": """SELECT DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1) as date, count(*) as N 
                     FROM {1}.{2}
                     GROUP BY DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1)
