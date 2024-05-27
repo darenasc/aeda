@@ -156,10 +156,11 @@ def get_db_connection(conn_string):
             conn = snowflake.connector.connect(
                 user=conn_string["user"],
                 password=conn_string["password"],
-                account=conn_string["host"],
+                account=conn_string["account"],
                 warehouse=conn_string["warehouse"],
                 database=conn_string["catalog"],
                 schema=conn_string["schema"],
+                role=conn_string["role"],
             )
         except:
             logger.error("Database connection error")

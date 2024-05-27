@@ -79,6 +79,7 @@ SQL_SCRIPTS = {
     "columns": {
         "mysql": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
         "postgres": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
+        "snowflake": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
         "mssqlserver": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
         "mariadb": """SELECT ? AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = ? AND T.TABLE_SCHEMA = ?;""",
         "aurora": """SELECT %s AS SERVER_NAME, C.TABLE_CATALOG, C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION, C.DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS AS C INNER JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_CATALOG = T.TABLE_CATALOG AND C.TABLE_SCHEMA = T.TABLE_SCHEMA AND C.TABLE_NAME = T.TABLE_NAME AND T.TABLE_TYPE = 'BASE TABLE' AND T.TABLE_CATALOG = %s AND T.TABLE_SCHEMA = %s;""",
@@ -240,6 +241,7 @@ SQL_SCRIPTS = {
     "number_of_columns": {
         "mysql": """SELECT %s AS SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COUNT(*) AS N_COLUMNS, NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "postgres": """SELECT %s AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
+        "snowflake": """SELECT %s AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "mssqlserver": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "mariadb": """SELECT ? AS SERVER_NAME , TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME , COUNT(*) AS N_COLUMNS , NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ? GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
         "aurora": """SELECT %s AS SERVER_NAME, TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COUNT(*) AS N_COLUMNS, NULL AS N_ROWS FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s GROUP BY TABLE_CATALOG , TABLE_SCHEMA , TABLE_NAME ORDER BY 1,2,3,4;""",
@@ -249,6 +251,7 @@ SQL_SCRIPTS = {
     "number_of_rows": {
         "mysql": """select count(*) as n from `{}`.`{}`""",
         "postgres": """select count(*) as n from {}.{}""",
+        "snowflake": """select count(*) as n from {}."{}";""",
         "mssqlserver": """select count(*) as n from {}.{}""",
         "mariadb": """select count(*) as n from {}.{}""",
         "aurora": """select count(*) as n from `{}`.`{}`""",
@@ -284,6 +287,7 @@ SQL_SCRIPTS = {
     "get_unique_count": {
         "mysql": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM `{1}`.`{2}`""",
         "postgres": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
+        "snowflake": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}."{2}";""",
         "mssqlserver": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "mariadb": """select count(distinct "{0}") as count_distinct , sum(case when "{0}" is null then 1 else 0 end) as count_null FROM {1}.{2}""",
         "aurora": """select count(distinct `{0}`) as count_distinct , sum(case when `{0}` is null then 1 else 0 end) as count_null FROM `{1}`.`{2}`""",
@@ -302,6 +306,7 @@ SQL_SCRIPTS = {
     "get_frequency": {
         "mysql": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM `{1}`.`{2}` GROUP BY `{0}`;""",
         "postgres": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
+        "snowflake": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}."{2}" GROUP BY "{0}";""",
         "mssqlserver": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "mariadb": """SELECT "{0}" AS "{0}" , COUNT(*) AS N FROM {1}.{2} GROUP BY "{0}";""",
         "aurora": """SELECT `{0}` AS `{0}` , COUNT(*) AS N FROM `{1}`.`{2}` GROUP BY `{0}`;""",
@@ -376,6 +381,9 @@ SQL_SCRIPTS = {
         "postgres": """select date_trunc('month', "{0}")::date , count(*) as N
                     from {1}.{2} 
                     group by date_trunc('month', "{0}")::date;""",
+        "snowflake": """select date_trunc('month', "{0}")::date , count(*) as N
+                    from {1}."{2}" 
+                    group by date_trunc('month', "{0}")::date;""",
         "mssqlserver": """SELECT DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1) as date, count(*) as N 
                     FROM {1}.{2}
                     GROUP BY DATEFROMPARTS(YEAR([{0}]), MONTH([{0}]), 1)
@@ -418,6 +426,14 @@ SQL_SCRIPTS = {
                     , MIN("{0}") AS MIN_
                     , MAX("{0}") - MIN("{0}") as RANGE_
                     FROM {1}.{2};""",
+        "snowflake": """SELECT AVG("{0}") AS AVG_
+                    , stddev("{0}") as STDEV_
+                    , VARIANCE("{0}") as VAR_
+                    , SUM("{0}") as SUM_
+                    , MAX("{0}") AS MAX_
+                    , MIN("{0}") AS MIN_
+                    , MAX("{0}") - MIN("{0}") as RANGE_
+                    FROM {1}."{2}";""",
         "mssqlserver": """SELECT AVG(CAST("{0}" AS FLOAT)) AS AVG_
                     , STDEV(CAST("{0}" AS FLOAT)) as STDEV_
                     , VAR(CAST("{0}" AS FLOAT)) as VAR_
