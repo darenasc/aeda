@@ -152,6 +152,7 @@ def get_db_connection(conn_string):
     elif conn_string["db_engine"] == "snowflake":
         try:
             import snowflake.connector
+            logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
 
             conn = snowflake.connector.connect(
                 user=conn_string["user"],

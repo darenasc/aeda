@@ -41,7 +41,16 @@ SQL_CREATE_SCRIPTS = {
 }
 
 DATA_TYPES = {
-    "date_types": ["datetime", "timestamp", "date", "datetime2", "smalldatetime"],
+    "date_types": [
+        "datetime", 
+        "timestamp", 
+        "date", 
+        "datetime2", 
+        "smalldatetime", 
+        "timestamp_ntz", 
+        "timestamp_tz", 
+        "timestamp_ltz"
+    ],
     "numeric_types": [
         "int",
         "integer",
