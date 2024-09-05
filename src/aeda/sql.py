@@ -2,6 +2,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
+from termcolor import colored
 from tqdm import tqdm
 
 from aeda import utils as _utils
@@ -12,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
-def create_database(section: str):
+def create_database(section: str) -> None:
     """Creates the metadata database based on the database engine.
 
     Parameters:
@@ -21,9 +22,21 @@ def create_database(section: str):
     conn_string = _utils.get_db_connection_string(section)
     conn = _utils.get_db_connection(conn_string)
 
-    logger.info(f"""Creating a {conn_string["db_engine"]} database""")
+    logger.info(f"""Creating a {colored(conn_string["db_engine"], 'green')} database""")
 
     if conn_string["db_engine"] in ["mysql", "postgres"]:
+        with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
+            sql_script = f.read()
+            scripts = sql_script.split(";")
+            scripts = [x for x in sql_script.split(";") if len(x.strip()) > 0]
+        cursor = conn.cursor()
+
+        for script in scripts:
+            cursor.execute(script)
+            conn.commit()
+        cursor.close()
+        conn.close()
+    elif conn_string["db_engine"] in ["snowflake"]:
         with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
             sql_script = f.read()
             scripts = sql_script.split(";")
@@ -40,7 +53,9 @@ def create_database(section: str):
         if not Path(conn_string["folder"]).is_dir():
             Path(conn_string["folder"]).mkdir(parents=True)
 
-        logger.info(f"Creating database {dbname} in {conn_string['folder']}")
+        logger.info(
+            f"Creating database {colored(dbname, 'green')} in {colored(conn_string['folder'], 'yellow')}"
+        )
 
         conn = sqlite3.connect(Path(conn_string["folder"]) / dbname)
 
@@ -56,8 +71,15 @@ def create_database(section: str):
 
         cursor.close()
         conn.close()
+    else:
+        logger.info(
+            f'{colored(conn_string["db_engine"], "green")} database not supported yet. Please create a new issue on github https://github.com/darenasc/aeda/issues'
+        )
+        return None
 
-    logger.info(f"A {conn_string['db_engine']} database created")
+    logger.info(
+        f"A {colored(conn_string['db_engine'], 'green')} metadata database created"
+    )
 
     return
 

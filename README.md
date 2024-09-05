@@ -149,7 +149,8 @@ following command:
 
 ```bash
 cd src/aeda
-python aeda_.py test-connections --source my-source-database --metadata my-metadata-database
+python aeda_.py test-connection my-source-database # or
+python aeda_.py test-connections my-source-database my-metadata-database # list of connection names from `databases.ini` separate by spaces
 ```
 
 Where `my-source-database` and `my-metadata-database` are the names of the 

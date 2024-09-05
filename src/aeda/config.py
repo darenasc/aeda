@@ -37,19 +37,19 @@ SQL_CREATE_SCRIPTS = {
     "postgres": SQL_SCRIPTS_DIR / "postgres" / "postgres.sql",
     "mssqlserver": SQL_SCRIPTS_DIR / "mssqlserver" / "mssqlserver.sql",
     "mariadb": SQL_SCRIPTS_DIR / "mariadb" / "mariadb.sql",
-    "snowflake": SQL_SCRIPTS_DIR / "mariadb" / "snowflake.sql",
+    "snowflake": SQL_SCRIPTS_DIR / "snowflake" / "snowflake.sql",
 }
 
 DATA_TYPES = {
     "date_types": [
-        "datetime", 
-        "timestamp", 
-        "date", 
-        "datetime2", 
-        "smalldatetime", 
-        "timestamp_ntz", 
-        "timestamp_tz", 
-        "timestamp_ltz"
+        "datetime",
+        "timestamp",
+        "date",
+        "datetime2",
+        "smalldatetime",
+        "timestamp_ntz",
+        "timestamp_tz",
+        "timestamp_ltz",
     ],
     "numeric_types": [
         "int",

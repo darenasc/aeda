@@ -44,7 +44,7 @@ def get_db_connection_string(db_conf: str, filename: Path = CONFIG_DB) -> dict:
 
 def get_connection_parameters(
     db_conf: str, filename: Path = CONFIG_DB
-) -> Union[str, str, str, str]:
+) -> tuple[str, str, str, str]:
     """get_connection_parameters(db_conf: str, filename: Path = CONFIG_DB) -> Union[str, str, str, str]
 
     Args:
@@ -67,7 +67,7 @@ def get_query(query_type: str, db_engine: str):
     return query
 
 
-def get_db_connection(conn_string):
+def get_db_connection(conn_string: dict):
     conn = None
     if conn_string["db_engine"] == "postgres":
         try:
@@ -86,7 +86,7 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] in ["mysql"]:
         try:
-            import pymysql
+            import pymysql  # type: ignore
 
             conn = pymysql.connect(
                 host=conn_string["host"],
@@ -130,7 +130,7 @@ def get_db_connection(conn_string):
             raise
     elif conn_string["db_engine"] == "mariadb":
         try:
-            import mariadb
+            import mariadb  # type: ignore
 
             conn = mariadb.connect(
                 user=conn_string["user"],
@@ -152,7 +152,8 @@ def get_db_connection(conn_string):
     elif conn_string["db_engine"] == "snowflake":
         try:
             import snowflake.connector
-            logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
+
+            logging.getLogger("snowflake.connector").setLevel(logging.WARNING)
 
             conn = snowflake.connector.connect(
                 user=conn_string["user"],
@@ -194,7 +195,7 @@ def get_db_connection(conn_string):
     return conn
 
 
-def check_database_connection(conn_string: str):
+def check_database_connection(conn_string: dict):
     # conn = get_db_connection(conn_string)
     try:
         conn = get_db_connection(conn_string)

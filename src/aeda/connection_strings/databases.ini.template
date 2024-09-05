@@ -17,6 +17,31 @@ password = <METADATA-PASSWORD>
 port = <METADATA-PORT>
 metadata_database = yes
 
+[my-source-snowflake]
+db_engine = snowflake
+account = <SNOWFLAKE-ACCOUNT>
+host = <IP-OR-HOSTNAME-SOURCE-DATABASE>
+warehouse = <SNOWFLAKE-WAREHOUSE>
+role = "<SNOWFLAKE-ROLE>"
+catalog = <CATALOG-SOURCE-DATABASE>
+schema = <SCHEMA-SOURCE-DATABASE>
+user = <SOURCE-USER>
+password = <SOURCE-PASSWORD>
+port = <SOURCE-PORT>
+
+[my-metadata-snowflake]
+db_engine = snowflake
+account = <SNOWFLAKE-ACCOUNT>
+host = <IP-OR-HOSTNAME-METADATA-DATABASE>
+warehouse = <SNOWFLAKE-WAREHOUSE>
+role = "<SNOWFLAKE-ROLE>"
+catalog = <CATALOG-METADATA-DATABASE>
+schema = <SCHEMA-METADATA-DATABASE>
+user = <METADATA-USER>
+password = <METADATA-PASSWORD>
+port = <METADATA-PORT>
+metadata_database = yes
+
 [<my-sqlite3-metadata-database>]
 db_engine = sqlite3
 schema = <FILENAME-WITHOUT-EXTENSION-(DATABASE-NAME)>
