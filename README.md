@@ -46,7 +46,7 @@ pipenv install Pipfile
 
 `aeda` requires a `databases.ini` file in the `src/aeda/connection_strings/` 
 folder to store the connections to databases. You can rename the 
-[`databases.ini.template`](src/aeda/connection_strings/databases_template.ini) 
+[`databases.ini.template`](src/aeda/connection_strings/databases.ini.template) 
 file that is included with the repo and then add your connections there. 
 The `databases.ini` file is not syncronised with the repo.
 
