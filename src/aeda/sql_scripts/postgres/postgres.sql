@@ -1,7 +1,5 @@
-DROP DATABASE IF EXISTS metadata;
-CREATE DATABASE metadata;
-
-\c metadata;
+-- DROP DATABASE IF EXISTS metadata;
+-- CREATE DATABASE metadata;
 
 CREATE TABLE IF NOT EXISTS metadata.public.columns (SERVER_NAME VARCHAR(255)
       , TABLE_CATALOG VARCHAR(255)
@@ -71,14 +69,14 @@ CREATE TABLE IF NOT EXISTS metadata.public.stats (SERVER_NAME VARCHAR(255)
       , P99 FLOAT
       , IQR FLOAT);
 
-CREATE VIEW servers AS 
+CREATE OR REPLACE VIEW public.servers AS 
 select      server_name
             , table_catalog
             , table_schema
             , count(distinct table_name) as n_tables
             , sum(n_columns) as n_columns
             , sum(n_rows) as n_rows 
-from "tables" 
+from public."tables" 
 group by server_name, table_catalog , table_schema;
 
 -- TODO - add view of dates summary

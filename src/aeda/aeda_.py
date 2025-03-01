@@ -24,7 +24,8 @@ def create_database(
     Parameters:
         db_engine (str): Class of database engine to be used.
 
-        db_conf_section: Contains the information to connect to the database of the `db_engine` type.
+        db_conf_section: Contains the information to connect to the database of
+            the `db_engine` type.
     """
     # TODO: Remove the db_engine parameter and use the section parameter to get the db_engine type.
     assert db_engine in SUPPORTED_DB_ENGINES, f"{db_engine} is not supported."

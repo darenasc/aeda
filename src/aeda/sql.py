@@ -25,13 +25,20 @@ def create_database(section: str) -> None:
     logger.info(f"""Creating a {colored(conn_string["db_engine"], 'green')} database""")
 
     if conn_string["db_engine"] in ["mysql", "postgres"]:
+        # TODO Check if create database works for `mysql`
+        conn.autocommit = True
         with open(SQL_CREATE_SCRIPTS[conn_string["db_engine"]], "r") as f:
             sql_script = f.read()
             scripts = sql_script.split(";")
-            scripts = [x for x in sql_script.split(";") if len(x.strip()) > 0]
+            scripts = [
+                x
+                for x in sql_script.split(";")
+                if len(x.strip()) > 0 and not x.strip().startswith("--")
+            ]
         cursor = conn.cursor()
 
         for script in scripts:
+            script += ";"
             cursor.execute(script)
             conn.commit()
         cursor.close()
@@ -425,14 +432,16 @@ def insert_or_update_uniques(
     db_engine_metadata: str,
     overwrite: bool = True,
     min_n_rows: int = 0,
+    max_rows: int = 100_000,
+    max_columns: int = 50,
 ):
-    """
-    Parameters:
-        db_engine_source (str):
+    """Insert or update unique values.
 
-        db_engine_metadata (str):
-
-        overwrite (bool): (Optional)
+    Args:
+        db_engine_source (str): Connection parameters of the source.
+        db_engine_metadata (str): Connection parameters of the target.
+        overwrite (bool, optional): Overwrite the data. Defaults to True.
+        min_n_rows (int, optional): Minimum row count. Defaults to 0.
     """
 
     def get_unique_values(db_engine_source: str, table_name: str, column_name: str):
@@ -554,27 +563,78 @@ def insert_or_update_uniques(
         column_rows = get_columns_from_metadata(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        pbar1 = tqdm(column_rows, leave=False)
-        for column_row in pbar1:
-            column_name, ordinal_position, data_type = column_row
-            pbar1.set_description(f"Uniques - {table_name}.{column_name}")
-            count_distinct, count_null = get_unique_values(
-                db_engine_source, table_name, column_name
-            )
+        if n_rows < max_rows:
+            # process in pandas for tables with less than `max_rows` rows
+            import math
 
-            insert_into_uniques(
-                db_engine_metadata,
-                server_name,
-                catalog_name,
-                schema_name,
-                table_name,
-                column_name,
-                ordinal_position,
-                data_type,
-                int(count_distinct),
-                int(count_null),
+            import pandas as pd
+
+            df_ = pd.DataFrame(
+                column_rows, columns=["column_name", "ordinal_position", "data_type"]
             )
-        # logger.info("{} columns inserted into `uniques`".format(len(column_rows)))
+            _, _, _, schema_name = _utils.get_connection_parameters(db_engine_source)
+            conn_string_source = _utils.get_db_connection_string(db_engine_source)
+            conn_source = _utils.get_db_connection(conn_string_source)
+            cursor = conn_source.cursor()
+            count_distinct = []
+            count_null = []
+            for i in range(math.ceil(len(df_.column_name.to_list()) / max_columns)):
+                columns = df_.column_name.to_list()[
+                    i * max_columns : i * max_columns + max_columns
+                ]
+
+                query = f"select {', '.join(columns)} from {catalog_name}.{schema_name}.{table_name};"
+
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                df_aux = pd.DataFrame(rows, columns=columns)
+
+                count_distinct.append(df_aux.nunique())
+                count_null.append(df_aux.isnull().sum())
+            cursor.close()
+            conn_source.close()
+
+            df_unique = pd.concat(count_distinct).reset_index()
+            df_unique.columns = ["column_name", "distinct_values"]  # type:ignore
+            df_null = pd.concat(count_null).reset_index()
+            df_null.columns = ["column_name", "null_values"]  # type:ignore
+
+            df_ = df_.merge(df_unique).merge(df_null)
+            for _, r in df_.iterrows():
+                insert_into_uniques(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    r["column_name"],
+                    r["ordinal_position"],
+                    r["data_type"],
+                    r["distinct_values"],
+                    r["null_values"],
+                )
+        else:
+            pbar1 = tqdm(column_rows, leave=False)
+            for column_row in pbar1:
+                column_name, ordinal_position, data_type = column_row
+                pbar1.set_description(f"Uniques - {table_name}.{column_name}")
+                count_distinct, count_null = get_unique_values(
+                    db_engine_source, table_name, column_name
+                )
+
+                insert_into_uniques(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                    ordinal_position,
+                    data_type,
+                    int(count_distinct),  # type:ignore
+                    int(count_null),  # type:ignore
+                )
+            # logger.info("{} columns inserted into `uniques`".format(len(column_rows)))
 
 
 def insert_or_update_data_values(
