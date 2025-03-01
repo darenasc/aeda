@@ -442,6 +442,11 @@ def insert_or_update_uniques(
         db_engine_metadata (str): Connection parameters of the target.
         overwrite (bool, optional): Overwrite the data. Defaults to True.
         min_n_rows (int, optional): Minimum row count. Defaults to 0.
+        max_rows (int, optional): Max number of rows to process using pandas.
+            Use 0 (zero) to process everything on the server side.
+            Defaults to 100_000.
+        max_columns (int, optional): Max number of columns to query all to the
+            database. Defaults to 50.
     """
 
     def get_unique_values(db_engine_source: str, table_name: str, column_name: str):
@@ -643,14 +648,24 @@ def insert_or_update_data_values(
     overwrite: bool = False,
     threshold: int = 5_000,
     min_n_rows: int = 0,
+    max_rows: int = 50_000,
+    max_columns: int = 50,
 ):
-    """
-    Parameters:
-        db_engine_source (str):
+    """Insert or update data values.
 
-        db_engine_metadata (str):
-
-        threshold (int): [Optional] Maximum value of unique values to compute the frequency.
+    Args:
+        db_engine_source (str): Connection parameters of the source.
+        db_engine_metadata (str): Connection parameters of the target.
+        overwrite (bool, optional): Overwrite the data. Defaults to False.
+        threshold (int, optional): Maximum value of unique values to compute
+            the frequency.. Defaults to 5_000.
+        min_n_rows (int, optional): Minimum row count to start processing.
+            Defaults to 0.
+        max_rows (int, optional): Max number of rows to process using pandas.
+            Use 0 (zero) to process everything on the server side.
+            Defaults to 100_000.
+        max_columns (int, optional): Max number of columns to query all to the
+            database. Defaults to 50.
     """
 
     def get_data_values_columns(
@@ -816,65 +831,128 @@ def insert_or_update_data_values(
         column_rows = get_data_values_columns(
             db_engine_metadata, server_name, catalog_name, schema_name, table_name
         )
-        pbar1 = tqdm(column_rows, leave=False)
-        for column_row in pbar1:
-            column_name, ordinal_position, data_type = column_row
-            pbar1.set_description(f"Data values - {table_name}.{column_name}")
-            num_uniques = get_num_distinct_values(
-                db_engine_metadata,
-                server_name,
-                catalog_name,
-                schema_name,
-                table_name,
-                column_name,
-            )
-            if num_uniques > threshold or num_uniques < 0:
-                # logger.info(
-                #     "{}.{}.{} has {} unique values, more than the threshold {}".format(
-                #         table_name, column_name, value, num_uniques, threshold
-                #     )
-                # )
-                continue
-            if check_if_data_value_exists(
-                db_engine_metadata,
-                server_name,
-                catalog_name,
-                schema_name,
-                table_name,
-                column_name,
-            ):
-                if overwrite:
-                    delete_from_data_values(
-                        db_engine_metadata,
-                        server_name,
-                        catalog_name,
-                        schema_name,
-                        table_name,
-                        column_name,
-                    )
-                else:
-                    continue
-            data_value_rows = get_frequency(
-                db_engine_source, schema_name, table_name, column_name
-            )
 
-            data = []
-            for i, data_value in enumerate(data_value_rows):
-                value, num_rows = data_value
-                if len(str(value)) > MAX_LENGTH_VALUES:
-                    continue
-                data.append(
+        if n_rows < max_rows:
+            # Process in pandas
+            import math
+
+            import pandas as pd
+
+            df_ = pd.DataFrame(
+                column_rows, columns=["column_name", "ordinal_position", "data_type"]
+            )
+            _, _, _, schema_name = _utils.get_connection_parameters(db_engine_source)
+            conn_string_source = _utils.get_db_connection_string(db_engine_source)
+            conn_source = _utils.get_db_connection(conn_string_source)
+            cursor = conn_source.cursor()
+            dfs_ = []
+            for i in range(math.ceil(len(df_.column_name.to_list()) / max_columns)):
+                columns = df_.column_name.to_list()[
+                    i * max_columns : i * max_columns + max_columns
+                ]
+
+                query = f"select {', '.join(columns)} from {catalog_name}.{schema_name}.{table_name};"
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                df_aux = pd.DataFrame(rows, columns=columns)
+
+                for col in df_aux.columns:
+                    df_values = df_aux[col].value_counts(dropna=False).reset_index()
+                    df_values.columns = [
+                        "data_value",
+                        "frequency_number",
+                    ]  # type:ignore
+                    df_values["column_name"] = col
+                    if df_values.shape[0] < threshold:
+                        delete_from_data_values(
+                            db_engine_metadata,
+                            server_name,
+                            catalog_name,
+                            schema_name,
+                            table_name,
+                            col,
+                        )
+                        dfs_.append(df_values)
+
+                df_data_values = pd.concat(dfs_)
+            cursor.close()
+            conn_source.close()
+
+            data_ = []
+            for i, r in df_data_values.iterrows():  # type:ignore
+                data_.append(
                     (
                         server_name,
                         catalog_name,
                         schema_name,
                         table_name,
-                        column_name,
-                        str(value),
-                        int(num_rows),
+                        r["column_name"],
+                        str(r["data_value"]),
+                        int(r["frequency_number"]),
                     )
                 )
-            insert_many_into_data_values(db_engine_metadata, data)
+
+            insert_many_into_data_values(db_engine_metadata, data_)
+        else:
+            pbar1 = tqdm(column_rows, leave=False)
+            for column_row in pbar1:
+                column_name, ordinal_position, data_type = column_row
+                pbar1.set_description(f"Data values - {table_name}.{column_name}")
+                num_uniques = get_num_distinct_values(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                )
+                if num_uniques > threshold or num_uniques < 0:
+                    # logger.info(
+                    #     "{}.{}.{} has {} unique values, more than the threshold {}".format(
+                    #         table_name, column_name, value, num_uniques, threshold
+                    #     )
+                    # )
+                    continue
+                if check_if_data_value_exists(
+                    db_engine_metadata,
+                    server_name,
+                    catalog_name,
+                    schema_name,
+                    table_name,
+                    column_name,
+                ):
+                    if overwrite:
+                        delete_from_data_values(
+                            db_engine_metadata,
+                            server_name,
+                            catalog_name,
+                            schema_name,
+                            table_name,
+                            column_name,
+                        )
+                    else:
+                        continue
+                data_value_rows = get_frequency(
+                    db_engine_source, schema_name, table_name, column_name
+                )
+
+                data = []
+                for i, data_value in enumerate(data_value_rows):
+                    value, num_rows = data_value
+                    if len(str(value)) > MAX_LENGTH_VALUES:
+                        continue
+                    data.append(
+                        (
+                            server_name,
+                            catalog_name,
+                            schema_name,
+                            table_name,
+                            column_name,
+                            str(value),
+                            int(num_rows),
+                        )
+                    )
+                insert_many_into_data_values(db_engine_metadata, data)
     return
 
 
