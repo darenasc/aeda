@@ -324,6 +324,7 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
         logger.error(
             f"Exception: {e} Could't get number of rows from table {colored('.'.join([schema_name,table_name]), 'red')}"
         )
+        return None
     finally:
         cursor.close()
         conn.close()
