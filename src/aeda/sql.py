@@ -315,12 +315,18 @@ def get_number_of_rows(db_engine_source: str, schema_name: str, table_name: str)
     query = SQL_SCRIPTS["number_of_rows"][conn_string_source["db_engine"]]
 
     cursor = conn.cursor()
-    cursor.execute(query.format(schema_name, table_name))
+    try:
+        # FIXME chars in SAPHANA with '=', '>', or '#' chars in table names
+        cursor.execute(query.format(schema_name, table_name))
 
-    num_rows = cursor.fetchone()[0]
-
-    cursor.close()
-    conn.close()
+        num_rows = cursor.fetchone()[0]
+    except Exception as e:
+        logger.error(
+            f"Exception: {e} Could't get number of rows from table {colored('.'.join([schema_name,table_name]), 'red')}"
+        )
+    finally:
+        cursor.close()
+        conn.close()
 
     return num_rows
 
