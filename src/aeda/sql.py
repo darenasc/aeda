@@ -280,11 +280,18 @@ def get_number_of_columns(
     conn = _utils.get_db_connection(conn_string_source)
     cursor = conn.cursor()
 
-    cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
-    row = cursor.fetchone()
+    try:
+        cursor.execute(query, (server_name, catalog_name, schema_name, table_name))
+        row = cursor.fetchone()
+    except Exception as e:
+        logger.error(
+            f"Exception: {e} Could't get number of columns from table {colored('.'.join([schema_name,table_name]), 'red')}"
+        )
+        return None
 
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     return row
 
